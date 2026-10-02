@@ -1,0 +1,218 @@
+/* Lanka Offers Admin – Authentic AWS Management Console Design System */
+:root {
+  /* AWS Cloudscape Tokens */
+  --aws-navy:          #0f1b2a;   /* AWS Top Navigation background */
+  --aws-orange:        #ff9900;   /* AWS brand orange accent */
+  --aws-blue:          #0972d3;   /* Cloudscape interactive blue */
+  --aws-blue-hover:    #033160;   /* Cloudscape hover state */
+
+  /* Surface & Border Tokens */
+  --white:             #ffffff;
+  --page-bg:           #f2f3f3;   /* Authentic AWS Console background */
+  --border-color:      #eaeded;   /* Clean Cloudscape container border */
+
+  /* Text Tokens */
+  --text-primary:      #16191f;   /* Cloudscape body text */
+  --text-secondary:    #5f6b7a;   /* Cloudscape secondary label */
+  --text-muted:        #8795a1;
+  --text-link:         #0972d3;
+
+  /* Status Tokens */
+  --status-success:    #1d8102;
+  --status-error:      #d13212;
+  --status-warning:    #eb5f07;
+  --status-info:       #0972d3;
+
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--page-bg);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--page-bg);
+  color: var(--text-primary);
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--aws-blue-hover);
+  text-decoration: underline;
+}
+
+/* AWS Top Navigation Bar */
+#top-navigation [class*="awsui_top-navigation"] {
+  background-color: var(--aws-navy);
+}
+
+/* Confidence Bar */
+.confidence-bar-track {
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.confidence-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.2s linear;
+}
+.confidence-bar-fill.high   { background: var(--status-success); }
+.confidence-bar-fill.medium { background: var(--status-warning); }
+.confidence-bar-fill.low    { background: var(--status-error); }
+
+/* Audit Timeline */
+.audit-timeline {
+  position: relative;
+  padding-left: 20px;
+}
+.audit-timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--border-color);
+}
+.audit-event {
+  position: relative;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.audit-event::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--aws-blue);
+  border: 1px solid var(--white);
+}
+.audit-event-time {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+.audit-event-desc {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.audit-event-actor {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.audit-event-changes {
+  margin-top: 4px;
+  font-size: 11px;
+  background: var(--page-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+/* Diffs */
+.diff-old {
+  background: #fdf2f2;
+  color: var(--status-error);
+  text-decoration: line-through;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 12px;
+}
+.diff-new {
+  background: #f2f9f0;
+  color: var(--status-success);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Pipeline Stepper */
+.pipeline-stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.pipeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+.pipeline-step-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.pipeline-step-icon.success { background: #eaf5ea; color: var(--status-success); }
+.pipeline-step-icon.warning { background: #fdf3eb; color: var(--status-warning); }
+.pipeline-step-icon.error   { background: #fdf2f2; color: var(--status-error); }
+.pipeline-step-icon.pending { background: var(--border-color); color: var(--text-muted); }
+.pipeline-step-name { font-size: 11px; color: var(--text-secondary); text-align: center; }
+.pipeline-step-meta { font-size: 10px; color: var(--text-muted); text-align: center; }
+
+/* District Grid */
+.district-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.district-cell {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 10px 8px;
+  cursor: pointer;
+  transition: border-color 0.1s linear, background-color 0.1s linear;
+  text-align: center;
+  background: var(--white);
+}
+.district-cell:hover { border-color: var(--aws-blue); background: #f2f8fd; }
+.district-cell.selected { border-color: var(--aws-orange); background: #fffcf5; }
+.district-cell.has-markers { border-left: 3px solid var(--aws-blue); }
+.district-cell-name { font-size: 13px; font-weight: 600; }
+.district-cell-count { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* Clean Log Entries */
+.log-entry { font-family: "Open Sans", Arial, sans-serif; font-size: 13px; }
+.log-level-DEBUG { color: var(--text-muted); }
+.log-level-INFO  { color: var(--aws-blue); }
+.log-level-WARN  { color: var(--status-warning); }
+.log-level-ERROR { color: var(--status-error); }
+.log-level-FATAL { color: var(--status-error); font-weight: 700; }
+
+.similarity-score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+.similarity-score.high   { background: #eaf5ea; color: var(--status-success); }
+.similarity-score.medium { background: #fdf3eb; color: var(--status-warning); }
+.similarity-score.low    { background: #fdf2f2; color: var(--status-error); }
+
+.field-missing { color: var(--status-error); font-style: italic; font-size: 13px; }
+.field-low-confidence { border-left: 3px solid var(--status-warning) !important; padding-left: 8px; }
