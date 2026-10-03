@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Header from '@cloudscape-design/components/header';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Tabs from '@cloudscape-design/components/tabs';
@@ -8,6 +8,7 @@ import Button from '@cloudscape-design/components/button';
 import Modal from '@cloudscape-design/components/modal';
 import FormField from '@cloudscape-design/components/form-field';
 import Input from '@cloudscape-design/components/input';
+import Textarea from '@cloudscape-design/components/textarea';
 import Select from '@cloudscape-design/components/select';
 import Toggle from '@cloudscape-design/components/toggle';
 import Alert from '@cloudscape-design/components/alert';
@@ -61,6 +62,29 @@ const RULE_TYPE_OPTIONS = [
   { label: 'constant', value: 'constant', description: 'Always return a fixed string value' },
 ];
 
+const RULE_EXAMPLES: Record<string, { input: string; output: string; description: string }> = {
+  regex: {
+    input: '"Get 20% off on all purchases at ABC Store"',
+    output: '20',
+    description: 'Pattern: (\\d+)\\s*%\\s*off → Extracts the number before %',
+  },
+  field_map: {
+    input: '{"company_name": "Sampath Bank", "discount": "15%"}',
+    output: 'Sampath Bank',
+    description: 'Source path: company_name → Reads the value directly from JSON',
+  },
+  keyword_list: {
+    input: '"Valid on Visa, Mastercard, and Amex cards"',
+    output: 'true',
+    description: 'Keywords: visa,master,amex → Returns true if any keyword is found',
+  },
+  constant: {
+    input: '"Any offer text"',
+    output: 'LKR',
+    description: 'Constant: LKR → Always returns "LKR" regardless of input',
+  },
+};
+
 const RULE_TYPE_BADGE: Record<string, 'blue' | 'green' | 'grey' | 'red'> = {
   regex: 'blue', field_map: 'green', keyword_list: 'grey', constant: 'red',
 };
@@ -79,6 +103,9 @@ interface EditState {
   priority: string;
   /** Dot-path into raw_offer JSON to use as input, e.g. "promotion_details" */
   source_path: string;
+  /** Internal state for regex preview testing */
+  _testInput?: string;
+  _preview?: { matched: boolean; fullMatch?: string; groups?: string[]; error?: string };
 }
 
 
@@ -287,6 +314,7 @@ function TestPanel({ result, onDismiss }: TestPanelProps) {
         <Header
           variant="h3"
           actions={<Button variant="link" onClick={onDismiss}>Dismiss</Button>}
+          description="Evaluated on sample offers from the database. Shows the exact input passed to the rule and the extracted output value."
         >
           Test results — {result.matched}/{result.total} matched ({pct}%)
         </Header>
@@ -310,20 +338,40 @@ function TestPanel({ result, onDismiss }: TestPanelProps) {
 
         <Table
           variant="embedded"
+          resizableColumns
           columnDefinitions={[
             {
-              id: 'status', header: '', width: 30,
-              cell: (r) => <StatusIndicator type={r.matched ? 'success' : 'stopped'}>{''}</StatusIndicator>,
+              id: 'status', header: 'Status', width: 110, minWidth: 100,
+              cell: (r) => (
+                <StatusIndicator type={r.matched ? 'success' : 'stopped'}>
+                  {r.matched ? 'Matched' : 'No match'}
+                </StatusIndicator>
+              ),
             },
             {
-              id: 'title', header: 'Offer title', width: 320,
-              cell: (r) => <Box fontSize="body-s">{r.title.substring(0, 80)}</Box>,
+              id: 'title', header: 'Offer title', width: 240, minWidth: 200,
+              cell: (r) => <Box fontSize="body-s" fontWeight="bold">{r.title}</Box>,
             },
             {
-              id: 'extracted', header: 'Extracted value',
-              cell: (r) => r.extracted
-                ? <code style={{ fontSize: 12 }}>{r.extracted.substring(0, 120)}</code>
-                : <Box color="text-status-inactive">no match</Box>,
+              id: 'input', header: 'Rule input (evaluated data)', minWidth: 320,
+              cell: (r) => (
+                <div style={{ maxHeight: '75px', overflowY: 'auto' }}>
+                  <code style={{ fontSize: 11, background: '#f4f5f6', padding: '3px 6px', borderRadius: 4, wordBreak: 'break-all', display: 'block', whiteSpace: 'pre-wrap' }}>
+                    {r.input || '(empty input)'}
+                  </code>
+                </div>
+              ),
+            },
+            {
+              id: 'extracted', header: 'Extracted output', width: 220, minWidth: 180,
+              cell: (r) => r.extracted ? (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Badge color="green">Extracted</Badge>
+                  <code style={{ fontSize: 12, fontWeight: 'bold', color: '#1d8102', wordBreak: 'break-all' }}>{r.extracted}</code>
+                </div>
+              ) : (
+                <Box color="text-status-inactive">null (no match)</Box>
+              ),
             },
           ]}
           items={result.results}
@@ -798,9 +846,147 @@ function BankTab({ bank, rules, loading, onRefresh }: BankTabProps) {
   const [backtestResult, setBacktestResult] = useState<ApiParserBacktestResult | null>(null);
   const [backtestError, setBacktestError] = useState<string | null>(null);
 
+  const [testInputText, setTestInputText] = useState<string>(RULE_EXAMPLES.regex.input);
+interface LiveExecutionResult {
+  matched: boolean;
+  output: string | null;
+  error?: string;
+  details?: {
+    fullMatch?: string;
+    groups?: string[];
+    matchedKeywords?: string[];
+  };
+}
+
+  const [loadingSample, setLoadingSample] = useState(false);
+
+  const compiledRule = useMemo(() => {
+    if (!editState.rule_type) return { valid: false, error: 'Rule type required' };
+    if (!editState.pattern && editState.rule_type !== 'constant') {
+      return { valid: false, error: 'Pattern / expression is required' };
+    }
+
+    if (editState.rule_type === 'regex') {
+      try {
+        const re = new RegExp(editState.pattern, editState.flags || 'i');
+        return {
+          valid: true,
+          signature: `RegExp(/${editState.pattern}/${editState.flags || 'i'}) ➔ Group ${editState.capture_group || '1'}`,
+          execute: (text: string) => {
+            const m = text.match(re);
+            if (!m) return { matched: false, output: null };
+            const grp = parseInt(editState.capture_group || '1', 10);
+            const out = m[grp] ?? m[0] ?? null;
+            return {
+              matched: out !== null,
+              output: out,
+              details: {
+                fullMatch: m[0],
+                groups: m.slice(1).map((g, i) => `Group ${i + 1}: ${g ?? '(empty)'}`),
+              },
+            };
+          },
+        };
+      } catch (err: any) {
+        return { valid: false, error: `Invalid regex syntax: ${err.message}` };
+      }
+    }
+
+    if (editState.rule_type === 'keyword_list') {
+      const rawTokens = editState.pattern.split(',').map((k) => k.trim()).filter(Boolean);
+      if (rawTokens.length === 0) return { valid: false, error: 'At least one keyword is required' };
+      return {
+        valid: true,
+        signature: `KeywordList([${rawTokens.join(', ')}]) ➔ Detected Tokens`,
+        execute: (text: string) => {
+          const found = rawTokens.filter((k) => new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(text));
+          return {
+            matched: found.length > 0,
+            output: found.length > 0 ? found.join(', ') : null,
+            details: { matchedKeywords: found },
+          };
+        },
+      };
+    }
+
+    if (editState.rule_type === 'field_map') {
+      return {
+        valid: true,
+        signature: `FieldMap("${editState.pattern}") ➔ JSON Path lookup`,
+        execute: (inputStr: string) => {
+          try {
+            const obj = JSON.parse(inputStr);
+            const parts = editState.pattern.split('.');
+            let cur: any = obj;
+            for (const p of parts) {
+              if (cur == null) return { matched: false, output: null };
+              cur = cur[p];
+            }
+            return {
+              matched: cur !== undefined,
+              output: cur != null ? (typeof cur === 'object' ? JSON.stringify(cur) : String(cur)) : null,
+              details: { fullMatch: editState.pattern },
+            };
+          } catch {
+            return {
+              matched: false,
+              output: null,
+              error: 'Input must be valid JSON for field_map evaluation.',
+            };
+          }
+        },
+      };
+    }
+
+    if (editState.rule_type === 'constant') {
+      return {
+        valid: true,
+        signature: `Constant("${editState.pattern}") ➔ Literal value`,
+        execute: () => ({
+          matched: true,
+          output: editState.pattern,
+        }),
+      };
+    }
+
+    return { valid: false, error: `Unknown rule type: ${editState.rule_type}` };
+  }, [editState.rule_type, editState.pattern, editState.flags, editState.capture_group]);
+
+  const liveResult: LiveExecutionResult = useMemo(() => {
+    if (!compiledRule.valid || !compiledRule.execute) {
+      return { matched: false, output: null, error: compiledRule.error };
+    }
+    try {
+      return compiledRule.execute(testInputText);
+    } catch (err: any) {
+      return { matched: false, output: null, error: err.message };
+    }
+  }, [compiledRule, testInputText]);
+
+  async function fetchDbSample() {
+    setLoadingSample(true);
+    try {
+      const res = await api.sampleOffer(bank);
+      if (res.sample) {
+        if (editState.rule_type === 'field_map') {
+          setTestInputText(JSON.stringify(res.sample.raw_offer, null, 2));
+        } else {
+          const raw = res.sample.raw_offer as Record<string, any>;
+          const pathVal = editState.source_path && raw ? raw[editState.source_path] : null;
+          setTestInputText(pathVal ? (typeof pathVal === 'string' ? pathVal : JSON.stringify(pathVal)) : res.sample.title);
+        }
+      }
+    } catch (err: any) {
+      console.warn('Failed to load sample offer:', err);
+    } finally {
+      setLoadingSample(false);
+    }
+  }
 
   function openAdd() {
-    setEditState(emptyEdit(bank));
+    const e = emptyEdit(bank);
+    setEditState(e);
+    setTestInputText(RULE_EXAMPLES[e.rule_type]?.input ?? 'Sample text input');
     setSaveError(null);
     setEditModal(true);
   }
@@ -814,6 +1000,7 @@ function BankTab({ bank, rules, loading, onRefresh }: BankTabProps) {
       priority: String(r.priority ?? 100),
       source_path: r.source_path ?? '',
     });
+    setTestInputText(RULE_EXAMPLES[r.rule_type]?.input ?? 'Sample text input');
     setSaveError(null);
     setEditModal(true);
   }
@@ -952,28 +1139,29 @@ function BankTab({ bank, rules, loading, onRefresh }: BankTabProps) {
           </Header>
         }
 
+        resizableColumns
         columnDefinitions={[
           {
-            id: 'field', header: 'Field', width: 160,
+            id: 'field', header: 'Field', width: 160, minWidth: 140,
             cell: (r: ApiBankParserRule) => <Box fontWeight="bold">{fieldLabel(r.field)}</Box>,
           },
           {
-            id: 'priority', header: 'Priority', width: 80,
+            id: 'priority', header: 'Priority', width: 80, minWidth: 70,
             cell: (r: ApiBankParserRule) => <Box color="text-body-secondary" fontSize="body-s">{r.priority ?? 100}</Box>,
           },
           {
-            id: 'type', header: 'Type', width: 110,
+            id: 'type', header: 'Type', width: 110, minWidth: 100,
             cell: (r: ApiBankParserRule) => (
               <Badge color={RULE_TYPE_BADGE[r.rule_type] ?? 'grey'}>{r.rule_type}</Badge>
             ),
           },
 
           {
-            id: 'pattern', header: 'Pattern / keywords / field',
+            id: 'pattern', header: 'Pattern / keywords / field', minWidth: 260,
             cell: patternCell,
           },
           {
-            id: 'enabled', header: 'Enabled', width: 100,
+            id: 'enabled', header: 'Enabled', width: 100, minWidth: 90,
             cell: (r: ApiBankParserRule) => (
               <StatusIndicator type={r.enabled ? 'success' : 'stopped'}>
                 {r.enabled ? 'Enabled' : 'Disabled'}
@@ -981,27 +1169,37 @@ function BankTab({ bank, rules, loading, onRefresh }: BankTabProps) {
             ),
           },
           {
-            id: 'source', header: 'Source', width: 100,
+            id: 'source', header: 'Source', width: 90, minWidth: 80,
             cell: (r: ApiBankParserRule) => r.is_builtin
               ? <Box color="text-body-secondary" fontSize="body-s">Built-in</Box>
               : <Badge color="blue">Custom</Badge>,
           },
           {
-            id: 'actions', header: '',
+            id: 'actions', header: 'Actions', width: 180, minWidth: 180,
             cell: (r: ApiBankParserRule) => (
-              <SpaceBetween direction="horizontal" size="xs">
+              <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', whiteSpace: 'nowrap' }}>
                 <Button
-                  variant="link"
+                  iconName="caret-right-filled"
                   loading={testingId === r.id}
                   onClick={() => runTest(r)}
                 >
                   Test
                 </Button>
-                <Button variant="link" onClick={() => openEdit(r)}>Edit</Button>
+                <Button
+                  iconName="edit"
+                  onClick={() => openEdit(r)}
+                >
+                  Edit
+                </Button>
                 {!r.is_builtin && (
-                  <Button variant="link" onClick={() => setDeleteId(r.id)}>Delete</Button>
+                  <Button
+                    iconName="remove"
+                    variant="icon"
+                    ariaLabel="Delete rule"
+                    onClick={() => setDeleteId(r.id)}
+                  />
                 )}
-              </SpaceBetween>
+              </div>
             ),
           },
         ]}
@@ -1073,7 +1271,7 @@ function BankTab({ bank, rules, loading, onRefresh }: BankTabProps) {
             }
             description={
               editState.rule_type === 'regex' ? 'JavaScript regex without delimiters, e.g. (\\d+(?:\\.\\d+)?)\\s*%' :
-              editState.rule_type === 'field_map' ? 'Top-level key in the raw_offer JSON, e.g. company_name or short_discount' :
+              editState.rule_type === 'field_map' ? 'Top-level key or dot-path in the raw_offer JSON, e.g. company_name or offer.discountPercentage' :
               editState.rule_type === 'keyword_list' ? 'Comma-separated keywords to detect, e.g. credit,debit,visa,master' :
               'Fixed string always returned — useful for constant identifiers'
             }
@@ -1107,6 +1305,140 @@ function BankTab({ bank, rules, loading, onRefresh }: BankTabProps) {
               </FormField>
             </ColumnLayout>
           )}
+
+          {/* ── Rule Compiler & Interactive Sandbox (Input ➔ Output) ── */}
+          <Container
+            header={
+              <Header
+                variant="h3"
+                description="Live compilation & sandbox — test input against the rule to inspect the output immediately"
+                actions={
+                  <SpaceBetween direction="horizontal" size="xs">
+                    <Button
+                      iconName="refresh"
+                      onClick={() => {
+                        const eg = RULE_EXAMPLES[editState.rule_type]?.input ?? 'Sample text';
+                        setTestInputText(eg);
+                      }}
+                    >
+                      Reset example
+                    </Button>
+                    <Button
+                      iconName="download"
+                      loading={loadingSample}
+                      onClick={fetchDbSample}
+                    >
+                      Load live offer from {BANK_LABELS[bank]}
+                    </Button>
+                  </SpaceBetween>
+                }
+              >
+                Rule Compiler &amp; Sandbox (Input ➔ Output)
+              </Header>
+            }
+          >
+            <SpaceBetween size="m">
+              {/* Compiler Status Bar */}
+              <div style={{
+                background: compiledRule.valid ? '#f2fcf3' : '#fdf2f2',
+                border: `1px solid ${compiledRule.valid ? '#1d8102' : '#d13212'}`,
+                padding: '8px 12px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <StatusIndicator type={compiledRule.valid ? 'success' : 'error'}>
+                    {compiledRule.valid ? 'Rule compiled successfully' : 'Compilation error'}
+                  </StatusIndicator>
+                  {compiledRule.valid && (
+                    <code style={{ fontSize: 11, color: '#414750' }}>{compiledRule.signature}</code>
+                  )}
+                </div>
+                <Badge color={compiledRule.valid ? 'green' : 'red'}>
+                  {compiledRule.valid ? 'COMPILED' : 'INVALID'}
+                </Badge>
+              </div>
+
+              {compiledRule.error && (
+                <Alert type="error" header="Syntax error">{compiledRule.error}</Alert>
+              )}
+
+              {/* Input ➔ Output Split Layout */}
+              <ColumnLayout columns={2}>
+                <div>
+                  <FormField
+                    label="Test input"
+                    description={
+                      editState.rule_type === 'field_map'
+                        ? 'JSON payload for field mapping'
+                        : 'Sample text to evaluate against this rule'
+                    }
+                  >
+                    <Textarea
+                      value={testInputText}
+                      onChange={e => setTestInputText(e.detail.value)}
+                      placeholder={RULE_EXAMPLES[editState.rule_type]?.input ?? 'Enter test input...'}
+                      rows={5}
+                    />
+                  </FormField>
+                </div>
+
+                <div>
+                  <FormField
+                    label="Necessary output"
+                    description="Extracted value produced by the compiled rule"
+                  >
+                    <div style={{
+                      minHeight: '115px',
+                      background: '#fafafa',
+                      border: '1px solid #e9ebed',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <Box variant="awsui-key-label">Evaluation result</Box>
+                          <StatusIndicator type={liveResult.matched ? 'success' : 'stopped'}>
+                            {liveResult.matched ? 'MATCHED' : 'NO MATCH'}
+                          </StatusIndicator>
+                        </div>
+                        {liveResult.matched ? (
+                          <div style={{ background: '#ecf7ed', padding: '6px 10px', borderRadius: 4 }}>
+                            <code style={{ fontSize: 13, fontWeight: 'bold', color: '#1d8102', wordBreak: 'break-all' }}>
+                              {liveResult.output}
+                            </code>
+                          </div>
+                        ) : (
+                          <Box color="text-status-inactive" fontSize="body-s">
+                            {liveResult.error || 'No match found for this input'}
+                          </Box>
+                        )}
+                      </div>
+
+                      {liveResult.details && (
+                        <Box color="text-body-secondary" fontSize="body-s" margin={{ top: 'xs' }}>
+                          {liveResult.details.fullMatch && (
+                            <div>Full match: <code>{liveResult.details.fullMatch}</code></div>
+                          )}
+                          {liveResult.details.groups && liveResult.details.groups.length > 0 && (
+                            <div>Groups: {liveResult.details.groups.join(', ')}</div>
+                          )}
+                          {liveResult.details.matchedKeywords && (
+                            <div>Keywords found: {liveResult.details.matchedKeywords.join(', ')}</div>
+                          )}
+                        </Box>
+                      )}
+                    </div>
+                  </FormField>
+                </div>
+              </ColumnLayout>
+            </SpaceBetween>
+          </Container>
 
           <FormField label="Notes" description="Optional explanation of what this rule does and why">
             <Input

@@ -501,15 +501,15 @@ export default function RulesPage() {
           : <SpaceBetween direction="horizontal" size="xxs">{r.banks.map(b => <Badge key={b}>{b.toUpperCase()}</Badge>)}</SpaceBetween>,
       },
       {
-        id: 'actions', header: '', width: showDelete ? 165 : 120,
+        id: 'actions', header: 'Actions', width: showDelete ? 190 : 150, minWidth: showDelete ? 190 : 150,
         cell: (r: ApiCustomRule) => (
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button variant="link" loading={testing === r.id} onClick={() => testRule(r)}>Test</Button>
-            <Button variant="link" onClick={() => { setModalError(null); setModal({ form: toForm(r), editing: r }); }}>Edit</Button>
+          <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', whiteSpace: 'nowrap' }}>
+            <Button iconName="caret-right-filled" loading={testing === r.id} onClick={() => testRule(r)}>Test</Button>
+            <Button iconName="edit" onClick={() => { setModalError(null); setModal({ form: toForm(r), editing: r }); }}>Edit</Button>
             {showDelete && (
-              <Button variant="link" onClick={() => setDeleteConfirm(r)}>Delete</Button>
+              <Button iconName="remove" variant="icon" ariaLabel="Delete rule" onClick={() => setDeleteConfirm(r)} />
             )}
-          </SpaceBetween>
+          </div>
         ),
       },
     ];
