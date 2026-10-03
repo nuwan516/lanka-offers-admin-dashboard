@@ -4,12 +4,12 @@ import Box from '@cloudscape-design/components/box';
 import Table from '@cloudscape-design/components/table';
 import TextFilter from '@cloudscape-design/components/text-filter';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Button from '@cloudscape-design/components/button';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 interface MerchantRow {
   name: string;
@@ -52,22 +52,19 @@ export default function MerchantsPage() {
     .filter(m => !search || m.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Merchant aggregation from offer data in Neon Postgres"
-        counter={loading ? undefined : `(${merchants.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button onClick={() => navigate('/offers')}>All offers</Button>
-          </SpaceBetween>
-        }
-      >
-        Merchants
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Merchants"
+      description="Merchant aggregation from offer data in Neon Postgres"
+      counter={loading ? undefined : `(${merchants.length})`}
+      breadcrumbs={[{ text: 'Merchants', href: '/merchants' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button onClick={() => navigate('/offers')}>All offers</Button>
+        </SpaceBetween>
+      }
+    >
 
       <TextFilter
         filteringText={search}
@@ -108,6 +105,6 @@ export default function MerchantsPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

@@ -5,12 +5,12 @@ import Box from '@cloudscape-design/components/box';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Button from '@cloudscape-design/components/button';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
 import { useNavigate } from 'react-router-dom';
 import { api, type ApiValidationReport } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 export default function ValidationPage() {
   const navigate = useNavigate();
@@ -30,21 +30,18 @@ export default function ValidationPage() {
   const passRate = total > 0 ? Math.round(((total - failures) / total) * 100) : null;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Rule-based and LLM validation results from Neon Postgres"
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={() => navigate('/rules')}>Manage rules</Button>
-            <Button onClick={() => navigate('/llm-validation')}>LLM details</Button>
-          </SpaceBetween>
-        }
-      >
-        Validation
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Validation"
+      description="Rule-based and LLM validation results from Neon Postgres"
+      breadcrumbs={[{ text: 'Validation', href: '/validation' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={() => navigate('/rules')}>Manage rules</Button>
+          <Button onClick={() => navigate('/llm-validation')}>LLM details</Button>
+        </SpaceBetween>
+      }
+    >
 
       <Container header={<Header variant="h2">Summary</Header>}>
         <ColumnLayout columns={4} variant="text-grid">
@@ -164,6 +161,6 @@ export default function ValidationPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

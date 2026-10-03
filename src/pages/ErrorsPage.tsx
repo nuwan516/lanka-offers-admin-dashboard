@@ -1,14 +1,13 @@
 import Header from '@cloudscape-design/components/header';
-import SpaceBetween from '@cloudscape-design/components/space-between';
 import Box from '@cloudscape-design/components/box';
 import Container from '@cloudscape-design/components/container';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Spinner from '@cloudscape-design/components/spinner';
-import Alert from '@cloudscape-design/components/alert';
 import Table from '@cloudscape-design/components/table';
 import { api, type ApiScrapeRun } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 export default function ErrorsPage() {
   const { data: runsData, loading: runsLoading, error: runsError } = useApi(() => api.runs({ status: 'failed', limit: 100 }), []);
@@ -18,15 +17,12 @@ export default function ErrorsPage() {
   const validFailures = validData?.items ?? [];
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Scrape errors and validation failures from Neon Postgres"
-      >
-        Errors
-      </Header>
-
-      {runsError && <Alert type="error" header="API error">{runsError}</Alert>}
+    <PageLayout
+      title="Errors"
+      description="Scrape errors and validation failures from Neon Postgres"
+      breadcrumbs={[{ text: 'Errors', href: '/errors' }]}
+      error={runsError}
+    >
 
       <Container header={<Header variant="h2">Error summary</Header>}>
         <ColumnLayout columns={2} variant="text-grid">
@@ -76,6 +72,6 @@ export default function ErrorsPage() {
         }
         variant="embedded"
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

@@ -9,6 +9,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Link from '@cloudscape-design/components/link';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
+import { useTheme } from '../hooks/useTheme';
 
 const NAV_ITEMS: SideNavigationProps.Item[] = [
   { type: 'link', text: 'Overview', href: '/' },
@@ -70,6 +71,7 @@ export default function AppLayout() {
   const [toolsOpen, setToolsOpen] = useState(false);
 
   const { data: stats } = useApi(() => api.stats(), []);
+  const { isDark, toggleTheme } = useTheme();
   const runningJobs = parseInt(stats?.runs.running_jobs ?? '0');
 
   return (
@@ -78,6 +80,13 @@ export default function AppLayout() {
         <TopNavigation
           identity={{ href: '/', title: 'Lanka Offers Admin' }}
           utilities={[
+            {
+              type: 'button',
+              text: isDark ? 'Dark Mode' : 'Light Mode',
+              iconName: 'light-dark',
+              ariaLabel: `Switch to ${isDark ? 'light' : 'dark'} mode`,
+              onClick: toggleTheme,
+            },
             {
               type: 'button',
               text: runningJobs > 0 ? `${runningJobs} running` : 'No active jobs',

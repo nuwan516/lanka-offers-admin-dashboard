@@ -17,6 +17,7 @@ import FormField from '@cloudscape-design/components/form-field';
 import Textarea from '@cloudscape-design/components/textarea';
 import Input from '@cloudscape-design/components/input';
 import Badge from '@cloudscape-design/components/badge';
+import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { api, type ApiBacktestResult, type ApiCustomRule, type ApiRuleTestResult } from '../services/api';
 import { useApi } from '../services/use-api';
@@ -485,11 +486,11 @@ export default function RulesPage() {
       {
         id: 'rule', header: 'Field path → operator → condition',
         cell: (r: ApiCustomRule) => (
-          <span style={{ fontFamily: 'monospace', fontSize: 12 }}>
+          <span style={{ fontFamily: 'monospace', fontSize: 13 }}>
             {r.field_path}
-            <span style={{ color: '#687078', margin: '0 6px' }}>→</span>
+            <span style={{ color: 'var(--text-secondary)', margin: '0 6px' }}>→</span>
             {r.operator}
-            <span style={{ color: '#687078', margin: '0 6px' }}>→</span>
+            <span style={{ color: 'var(--text-secondary)', margin: '0 6px' }}>→</span>
             {opSummary(r)}
           </span>
         ),
@@ -501,9 +502,9 @@ export default function RulesPage() {
           : <SpaceBetween direction="horizontal" size="xxs">{r.banks.map(b => <Badge key={b}>{b.toUpperCase()}</Badge>)}</SpaceBetween>,
       },
       {
-        id: 'actions', header: 'Actions', width: showDelete ? 190 : 150, minWidth: showDelete ? 190 : 150,
+        id: 'actions', header: 'Actions', width: showDelete ? 220 : 180, minWidth: showDelete ? 220 : 180,
         cell: (r: ApiCustomRule) => (
-          <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', whiteSpace: 'nowrap' }}>
+          <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
             <Button iconName="caret-right-filled" loading={testing === r.id} onClick={() => testRule(r)}>Test</Button>
             <Button iconName="edit" onClick={() => { setModalError(null); setModal({ form: toForm(r), editing: r }); }}>Edit</Button>
             {showDelete && (
@@ -518,23 +519,18 @@ export default function RulesPage() {
   const anyError = rulesError ?? backtestError ?? globalError;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description={`${builtinRules.length} built-in + ${customRules.length} custom rules — all configurable, all stored in Neon Postgres`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={() => navigate('/validation')}>Validation reports</Button>
-            <Button loading={backtestLoading} onClick={() => setBacktestKey(k => k + 1)}>Refresh backtest</Button>
-          </SpaceBetween>
-        }
-      >
-        Rules
-      </Header>
-
-      {anyError && (
-        <Alert type="error" header="Error" dismissible onDismiss={() => setGlobalError(null)}>{anyError}</Alert>
-      )}
+    <PageLayout
+      title="Rules"
+      description={`${builtinRules.length} built-in + ${customRules.length} custom rules — all configurable, all stored in Neon Postgres`}
+      breadcrumbs={[{ text: 'Rules', href: '/rules' }]}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={() => navigate('/validation')}>Validation reports</Button>
+          <Button loading={backtestLoading} onClick={() => setBacktestKey(k => k + 1)}>Refresh backtest</Button>
+        </SpaceBetween>
+      }
+      error={anyError}
+    >
       {revalidateResult && (
         <Alert type="success" header="Re-validation complete" dismissible onDismiss={() => setRevalidateResult(null)}>
           Processed {revalidateResult.total} offers — {revalidateResult.passed} passed, {revalidateResult.failed} failed. Neon Postgres updated.
@@ -766,6 +762,6 @@ export default function RulesPage() {
           This cannot be undone. Re-validation will no longer apply this check.
         </Modal>
       )}
-    </SpaceBetween>
+    </PageLayout>
   );
 }

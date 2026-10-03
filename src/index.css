@@ -1,4 +1,6 @@
-/* Lanka Offers Admin – Authentic AWS Management Console Design System */
+/* Lanka Offers Admin – Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   /* AWS Cloudscape Tokens */
   --aws-navy:          #0f1b2a;   /* AWS Top Navigation background */
@@ -29,9 +31,160 @@
   --status-info:       #0972d3;
   --status-info-bg:    #f2f8fd;
 
-  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  /* ── Typography Topology Scale ──────────────────────────────────────────
+   * Tier 1 (Page title):        Inter 700 26px — used by PageLayout h1
+   * Tier 2 (Section title):     Inter 600 20px — used by Container h2 headers
+   * Tier 3 (Sub-section):       Inter 600 17px — used by h3 in collapsibles/modals
+   * Tier 4 (Body / Table):      Inter 400 15.5px — default paragraph / table cells
+   * Tier 5 (Label / Meta):      Inter 500 14px — key-labels, timestamps, metadata, descriptions
+   * Tier 6 (Micro / Badges):    Inter 600 13px — tooltips, hints, tag badges, status pills
+   * ─────────────────────────────────────────────────────────────────────── */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-size-t1: 26px;
+  --font-size-t2: 20px;
+  --font-size-t3: 17px;
+  --font-size-t4: 15.5px;
+  --font-size-t5: 14px;
+  --font-size-t6: 13px;
+  --font-weight-bold:   700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.55;
+
+  /* Cloudscape Global Hashed & Unhashed Token Overrides for High Legibility */
+  --font-family-base-gmnpzl: var(--font-family-base) !important;
+  --font-family-heading-ugphat: var(--font-family-base) !important;
+  --font-family-display-a93nj0: var(--font-family-base) !important;
+
+  /* Hashed Cloudscape Typography Tokens */
+  --font-size-body-m-a7nh2n: 15.5px !important;
+  --font-size-body-s-smc8cv: 14px !important;
+  --font-size-form-label-mxiqd7: 15px !important;
+  --font-size-key-value-pairs-label-1mmf3j: 14px !important;
+  --font-size-tabs-eeo215: 15.5px !important;
+  --font-size-heading-xs-j8yzxv: 15px !important;
+  --font-size-heading-s-zp08en: 17px !important;
+  --font-size-heading-m-170yiy: 19px !important;
+  --font-size-heading-l-vnacx6: 22px !important;
+  --font-size-heading-xl-wvkbur: 26px !important;
+  --font-size-display-l-wa6woo: 38px !important;
+  --font-size-display-xl-twzhl4: 48px !important;
+  --font-header-h2-description-size-g2wws3: 14.5px !important;
+
+  /* Unhashed Cloudscape Typography Tokens */
+  --font-size-body-m: 15.5px !important;
+  --font-size-body-s: 14px !important;
+  --font-size-heading-xl: 26px !important;
+  --font-size-heading-l: 22px !important;
+  --font-size-heading-m: 19px !important;
+  --font-size-heading-s: 17px !important;
+  --font-size-heading-xs: 15px !important;
+  --font-size-display-l: 38px !important;
+
+  /* Line Heights */
+  --line-height-body-m-2mh3ke: 23px !important;
+  --line-height-body-s-nu5hx1: 21px !important;
+  --line-height-form-label-asu26u: 22px !important;
+  --line-height-key-value-pairs-label-x3ofa3: 22px !important;
+  --line-height-heading-xs-q9j004: 21px !important;
+  --line-height-heading-s-hmi4vc: 23px !important;
+  --line-height-heading-m-uoaqdh: 25px !important;
+  --line-height-heading-l-mg5bx6: 28px !important;
+  --line-height-heading-xl-hko6p0: 32px !important;
+  --line-height-tabs-vpnjo7: 22px !important;
+  --font-header-h2-description-line-height-ts2s6o: 22px !important;
+  --line-height-body-m: 1.55 !important;
+  --line-height-body-s: 1.5 !important;
+
+  --color-text-body-default: #1e293b;
+  --color-text-body-secondary: #475569;
+  --color-text-heading-default: #0f172a;
+  --color-text-body-default-gtm97i: #16191f !important;
+  --color-text-body-secondary-y6dr4d: #475569 !important;
+  --color-text-form-secondary-t0glp7: #475569 !important;
+  --color-text-form-label-84uan1: #0f141a !important;
+  --color-text-label-tv95tq: #475569 !important;
+  --color-text-key-value-pairs-value-xmrgpn: #16191f !important;
+  --color-text-side-navigation-item-default-u0ig7c: #334155 !important;
+
+  --code-bg: #f1f5f9;
+  --code-text: #0f172a;
+  --code-border: #cbd5e1;
+
+  --border-radius-button: 6px;
+  --border-radius-container: 8px;
+  --border-radius-dropdown: 6px;
+  --border-radius-input: 6px;
+
+  /* Spacing Scale */
+  --space-2:  2px;
+  --space-4:  4px;
+  --space-8:  8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+
+  font-family: var(--font-family-base);
   color: var(--text-primary);
   background-color: var(--page-bg);
+}
+
+/* ── Dark Mode Tokens & Overrides ─────────────────────────────────────── */
+.awsui-dark-mode,
+:root.awsui-dark-mode,
+body.awsui-dark-mode {
+  --page-bg: #090d16;
+  --white: #141f30;
+  --border-color: #243247;
+  --border-hover: #38bdf8;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-link: #38bdf8;
+  --aws-navy: #060910;
+  --color-text-body-default: #f1f5f9;
+  --color-text-body-secondary: #94a3b8;
+  --color-text-heading-default: #ffffff;
+  --color-text-body-default-gtm97i: #f1f5f9 !important;
+  --color-text-body-secondary-y6dr4d: #94a3b8 !important;
+  --color-text-form-secondary-t0glp7: #94a3b8 !important;
+  --color-text-form-label-84uan1: #f8fafc !important;
+  --color-text-label-tv95tq: #94a3b8 !important;
+  --color-text-key-value-pairs-value-xmrgpn: #f1f5f9 !important;
+  --color-text-side-navigation-item-default-u0ig7c: #cbd5e1 !important;
+
+  --code-bg: #0b1320;
+  --code-text: #e2e8f0;
+  --code-border: #1e293b;
+
+  /* Re-assert font tokens inside dark mode root */
+  --font-size-body-m-a7nh2n: 15.5px !important;
+  --font-size-body-s-smc8cv: 14px !important;
+  --font-size-form-label-mxiqd7: 15px !important;
+  --font-size-key-value-pairs-label-1mmf3j: 14px !important;
+  --font-size-tabs-eeo215: 15.5px !important;
+  --font-size-heading-xs-j8yzxv: 15px !important;
+  --font-size-heading-s-zp08en: 17px !important;
+  --font-size-heading-m-170yiy: 19px !important;
+  --font-size-heading-l-vnacx6: 22px !important;
+  --font-size-heading-xl-wvkbur: 26px !important;
+  --line-height-body-m-2mh3ke: 23px !important;
+  --line-height-body-s-nu5hx1: 21px !important;
+  --line-height-form-label-asu26u: 22px !important;
+
+  color-scheme: dark;
+
+  /* Cloudscape Modal & Overlay Dark Mode Tokens */
+  --color-background-modal-overlay-mdne87: rgba(3, 7, 18, 0.78) !important;
+  --color-background-container-content-78ljyf: #141f30 !important;
+  --color-background-container-header-ydavso: #141f30 !important;
+  --color-border-container-divider-9huz1a: #243247 !important;
+  --color-border-divider-default-0de9c8: #243247 !important;
+  --shadow-modal-kwgqht: 0 25px 50px -12px rgba(0, 0, 0, 0.75) !important;
 }
 
 *, *::before, *::after {
@@ -45,9 +198,37 @@ html, body, #root {
   height: 100%;
   background-color: var(--page-bg);
   color: var(--text-primary);
-  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-t4); /* 15.5px base */
+  line-height: var(--line-height-relaxed);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+p {
+  font-size: 15px;
+  line-height: 1.55;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+small {
+  font-size: 13.5px;
+}
+
+/* ── Typography Topology Utility Classes ───────────────────────────────── */
+/* Tier 1 – Page title */
+.ty-t1 { font-family: var(--font-family-base); font-size: var(--font-size-t1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); color: var(--text-primary); }
+/* Tier 2 – Section heading */
+.ty-t2 { font-family: var(--font-family-base); font-size: var(--font-size-t2); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); color: var(--text-primary); }
+/* Tier 3 – Sub-section heading */
+.ty-t3 { font-family: var(--font-family-base); font-size: var(--font-size-t3); font-weight: var(--font-weight-semibold); line-height: var(--line-height-normal); color: var(--text-primary); }
+/* Tier 4 – Body text */
+.ty-t4 { font-family: var(--font-family-base); font-size: var(--font-size-t4); font-weight: var(--font-weight-regular); line-height: var(--line-height-relaxed); color: var(--text-primary); }
+/* Tier 5 – Labels & metadata */
+.ty-t5 { font-family: var(--font-family-base); font-size: var(--font-size-t5); font-weight: var(--font-weight-medium); line-height: var(--line-height-normal); color: var(--text-secondary); letter-spacing: 0.01em; }
+/* Tier 6 – Micro / hints */
+.ty-t6 { font-family: var(--font-family-base); font-size: var(--font-size-t6); font-weight: var(--font-weight-semibold); line-height: var(--line-height-normal); color: var(--text-muted); }
 
 a {
   color: var(--text-link);
@@ -57,6 +238,340 @@ a {
 a:hover {
   color: var(--aws-blue-hover);
   text-decoration: underline;
+}
+
+/* ── Universal Cloudscape Text Scalers ───────────────────────────────── */
+/* Box font size overrides */
+[class*="awsui_font-size-body-s"],
+[class*="awsui_box_"][class*="awsui_font-size-body-s"] {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+[class*="awsui_font-size-body-m"],
+[class*="awsui_box_"][class*="awsui_font-size-body-m"] {
+  font-size: 15.5px !important;
+  line-height: 1.55 !important;
+}
+
+[class*="awsui_font-size-heading-s"],
+[class*="awsui_box_"][class*="awsui_font-size-heading-s"] {
+  font-size: 17px !important;
+  line-height: 1.4 !important;
+}
+
+[class*="awsui_font-size-heading-m"],
+[class*="awsui_box_"][class*="awsui_font-size-heading-m"] {
+  font-size: 19px !important;
+  line-height: 1.35 !important;
+}
+
+[class*="awsui_font-size-heading-l"],
+[class*="awsui_box_"][class*="awsui_font-size-heading-l"] {
+  font-size: 22px !important;
+  line-height: 1.3 !important;
+}
+
+[class*="awsui_font-size-heading-xl"],
+[class*="awsui_box_"][class*="awsui_font-size-heading-xl"] {
+  font-size: 26px !important;
+  line-height: 1.25 !important;
+}
+
+/* ── Form Field Typography & Descriptions ────────────────────────────── */
+[class*="awsui_form-field"] [class*="awsui_label"],
+label[class*="awsui_label"],
+[class*="awsui_label_"] {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+[class*="awsui_form-field"] [class*="awsui_description"],
+[class*="awsui_description_"],
+[class*="awsui_form-field"] [class*="awsui_constraint"],
+[class*="awsui_form-field"] [class*="awsui_hints"] {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: var(--text-secondary) !important;
+}
+
+[class*="awsui_form-field"] [class*="awsui_error"],
+[class*="awsui_form-field"] [class*="awsui_warning"] {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+/* Form Controls (Inputs, Selects, Textareas, Radios, Checkboxes) */
+input[class*="awsui_input"],
+textarea[class*="awsui_textarea"],
+[class*="awsui_input"] input,
+[class*="awsui_textarea"] textarea,
+[class*="awsui_select"] button,
+[class*="awsui_autosuggest"] input,
+[class*="awsui_multiselect"] button {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+[class*="awsui_radio-button"] [class*="awsui_label"],
+[class*="awsui_checkbox"] [class*="awsui_label"],
+[class*="awsui_toggle"] [class*="awsui_label"] {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+[class*="awsui_radio-button"] [class*="awsui_description"],
+[class*="awsui_checkbox"] [class*="awsui_description"],
+[class*="awsui_toggle"] [class*="awsui_description"] {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+[class*="awsui_options-list"] [class*="awsui_option"],
+[class*="awsui_dropdown"] [class*="awsui_option"] {
+  font-size: 14.5px !important;
+}
+
+/* ── Cloudscape Buttons Styling & Wrapping Prevention ─────────────────── */
+button[class*="awsui_button"],
+[class*="awsui_button"] {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  border-radius: 6px !important;
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+[class*="awsui_button"]:hover {
+  box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.08);
+}
+
+[class*="awsui_button"] [class*="awsui_content"] {
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+[class*="awsui_button"] [class*="awsui_icon"] {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Table cell buttons (Test, Edit, etc.) */
+table [class*="awsui_button"],
+[class*="awsui_table"] [class*="awsui_button"] {
+  min-height: 32px !important;
+  padding: 4px 12px !important;
+  font-size: 14px !important;
+}
+
+/* ── Table Typography & Row Comfort ───────────────────────────────────── */
+[class*="awsui_table"] th,
+[class*="awsui_header-cell"],
+table th {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.4 !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+[class*="awsui_table"] td,
+[class*="awsui_body-cell"],
+table td {
+  font-size: 14.5px !important;
+  line-height: 1.5 !important;
+  color: var(--text-primary) !important;
+  vertical-align: middle !important;
+}
+
+[class*="awsui_table"] td [class*="awsui_secondary-text"],
+[class*="awsui_table"] td small,
+table td small {
+  font-size: 13.5px !important;
+}
+
+[class*="awsui_pagination"] span,
+[class*="awsui_table"] [class*="awsui_counter"],
+[class*="awsui_header"] [class*="awsui_counter"] {
+  font-size: 14px !important;
+}
+
+/* ── Alerts & Notifications Typography ────────────────────────────────── */
+[class*="awsui_alert"] [class*="awsui_header"],
+[class*="awsui_flash"] [class*="awsui_header"] {
+  font-size: 15.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+[class*="awsui_alert"] [class*="awsui_content"],
+[class*="awsui_alert"] [class*="awsui_body"],
+[class*="awsui_alert"] p,
+[class*="awsui_flash"] [class*="awsui_content"] {
+  font-size: 14.5px !important;
+  line-height: 1.55 !important;
+}
+
+/* ── Key-Value Pairs Typography ───────────────────────────────────────── */
+[class*="awsui_key-value-pairs"] [class*="awsui_key"],
+[class*="awsui_key-value-pairs"] [class*="awsui_label"],
+[class*="awsui_key-label-variant"] {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  color: var(--text-secondary) !important;
+}
+
+[class*="awsui_key-value-pairs"] [class*="awsui_value"] {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Containers, Cards & Modals ───────────────────────────────────────── */
+[class*="awsui_container"] [class*="awsui_header"] h2,
+[class*="awsui_header"] h2 {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+[class*="awsui_container"] [class*="awsui_header"] [class*="awsui_description"],
+[class*="awsui_header"] [class*="awsui_description"] {
+  font-size: 14.5px !important;
+  line-height: 1.5 !important;
+  color: var(--text-secondary) !important;
+}
+
+[class*="awsui_modal"] [class*="awsui_header"] h2 {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+}
+
+[class*="awsui_modal"] [class*="awsui_content"],
+[class*="awsui_modal"] p {
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+[class*="awsui_expandable-section"] [class*="awsui_header"] {
+  font-size: 15.5px !important;
+  font-weight: 600 !important;
+}
+
+[class*="awsui_tabs"] [class*="awsui_tab-link"],
+[class*="awsui_tabs"] [role="tab"] {
+  font-size: 15.5px !important;
+  font-weight: 600 !important;
+}
+
+[class*="awsui_popover"] [class*="awsui_body"],
+[class*="awsui_popover"] [class*="awsui_content"],
+[class*="awsui_tooltip"] {
+  font-size: 13.5px !important;
+  line-height: 1.45 !important;
+}
+
+/* ── Status Indicators & Badges ───────────────────────────────────────── */
+[class*="awsui_status-indicator"],
+[class*="awsui_status-indicator"] span {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+[class*="awsui_badge"] {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+}
+
+/* ── Code & Pre Blocks (Never tiny, Dark-Mode Native) ─────────────────── */
+code, pre, kbd, samp,
+[class*="awsui_box_"][class*="awsui_inline-code-variant"] {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  background-color: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  border-radius: 4px;
+}
+
+.awsui-dark-mode code,
+.awsui-dark-mode pre,
+body.awsui-dark-mode code,
+body.awsui-dark-mode pre {
+  background-color: var(--code-bg) !important;
+  color: var(--code-text) !important;
+  border-color: var(--code-border) !important;
+}
+
+/* Guard: Prevent any white or near-white background leaks in dark mode */
+.awsui-dark-mode [style*="background: #f"],
+.awsui-dark-mode [style*="background:#f"],
+.awsui-dark-mode [style*="background: #fff"],
+.awsui-dark-mode [style*="background:#fff"],
+.awsui-dark-mode [style*="background: white"],
+.awsui-dark-mode [style*="background:white"],
+body.awsui-dark-mode [style*="background: #f"],
+body.awsui-dark-mode [style*="background:#f"],
+body.awsui-dark-mode [style*="background: #fff"],
+body.awsui-dark-mode [style*="background:#fff"],
+body.awsui-dark-mode [style*="background: white"],
+body.awsui-dark-mode [style*="background:white"] {
+  background: var(--code-bg) !important;
+  border-color: var(--code-border) !important;
+  color: var(--code-text) !important;
+}
+
+/* ── Side Navigation Typography & Contrast ───────────────────────────── */
+[class*="awsui_side-navigation"] [class*="awsui_link"],
+[class*="awsui_side-navigation"] a {
+  font-size: 14.5px !important;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+[class*="awsui_side-navigation"] [class*="awsui_section-header"] {
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-top: 14px !important;
+}
+
+[class*="awsui_side-navigation"] [class*="awsui_link-active"] {
+  color: var(--aws-blue) !important;
+  font-weight: 700 !important;
+  background: #eff6ff !important;
+  border-radius: 6px !important;
+}
+
+.awsui-dark-mode [class*="awsui_side-navigation"] [class*="awsui_link-active"],
+body.awsui-dark-mode [class*="awsui_side-navigation"] [class*="awsui_link-active"] {
+  color: #60a5fa !important;
+  background: rgba(59, 130, 246, 0.18) !important;
+}
+
+/* Breadcrumbs */
+[class*="awsui_breadcrumb-group"] [class*="awsui_link"],
+[class*="awsui_breadcrumb-group"] span {
+  font-size: 14px !important;
 }
 
 /* AWS Top Navigation Bar */
@@ -97,7 +612,7 @@ a:hover {
 .audit-event {
   position: relative;
   margin-bottom: 14px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .audit-event::before {
   content: '';
@@ -112,20 +627,21 @@ a:hover {
 }
 .audit-event-time {
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12.5px;
   margin-bottom: 2px;
 }
 .audit-event-desc {
   color: var(--text-primary);
   font-weight: 600;
+  font-size: 14.5px;
 }
 .audit-event-actor {
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 .audit-event-changes {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 13px;
   background: var(--page-bg);
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -139,14 +655,14 @@ a:hover {
   text-decoration: line-through;
   padding: 2px 6px;
   border-radius: 2px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .diff-new {
   background: var(--status-success-bg);
   color: var(--status-success);
   padding: 2px 6px;
   border-radius: 2px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -178,8 +694,8 @@ a:hover {
 .pipeline-step-icon.warning { background: var(--status-warning-bg); color: var(--status-warning); }
 .pipeline-step-icon.error   { background: var(--status-error-bg); color: var(--status-error); }
 .pipeline-step-icon.pending { background: var(--border-color); color: var(--text-muted); }
-.pipeline-step-name { font-size: 11px; color: var(--text-secondary); text-align: center; }
-.pipeline-step-meta { font-size: 10px; color: var(--text-muted); text-align: center; }
+.pipeline-step-name { font-size: 13px; color: var(--text-secondary); text-align: center; }
+.pipeline-step-meta { font-size: 12px; color: var(--text-muted); text-align: center; }
 
 /* District Grid */
 .district-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
@@ -191,20 +707,42 @@ a:hover {
   transition: border-color 0.1s linear, background-color 0.1s linear;
   text-align: center;
   background: var(--white);
+  color: var(--text-primary);
 }
 .district-cell:hover { border-color: var(--aws-blue); background: #f2f8fd; }
 .district-cell.selected { border-color: var(--aws-orange); background: #fffcf5; }
 .district-cell.has-markers { border-left: 3px solid var(--aws-blue); }
-.district-cell-name { font-size: 13px; font-weight: 600; }
-.district-cell-count { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.district-cell-name { font-size: 14px; font-weight: 600; }
+.district-cell-count { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
+.awsui-dark-mode .district-cell,
+body.awsui-dark-mode .district-cell {
+  background: #141f30;
+  border-color: #243247;
+}
+.awsui-dark-mode .district-cell:hover,
+body.awsui-dark-mode .district-cell:hover {
+  background: #1c2b42;
+  border-color: #38bdf8;
+}
+.awsui-dark-mode .district-cell.selected,
+body.awsui-dark-mode .district-cell.selected {
+  background: #2b2512;
+  border-color: var(--aws-orange);
+}
 
 /* Clean Log Entries */
-.log-entry { font-family: "Open Sans", Arial, sans-serif; font-size: 13px; }
+.log-entry { font-family: "Open Sans", Arial, sans-serif; font-size: 14px; }
 .log-level-DEBUG { color: var(--text-muted); }
 .log-level-INFO  { color: var(--aws-blue); }
 .log-level-WARN  { color: var(--status-warning); }
 .log-level-ERROR { color: var(--status-error); }
 .log-level-FATAL { color: var(--status-error); font-weight: 700; }
+
+.awsui-dark-mode .log-level-INFO,
+body.awsui-dark-mode .log-level-INFO {
+  color: #38bdf8;
+}
 
 .similarity-score {
   display: inline-flex;
@@ -220,5 +758,82 @@ a:hover {
 .similarity-score.medium { background: var(--status-warning-bg); color: var(--status-warning); }
 .similarity-score.low    { background: var(--status-error-bg); color: var(--status-error); }
 
-.field-missing { color: var(--status-error); font-style: italic; font-size: 13px; }
+.awsui-dark-mode .similarity-score.high,
+body.awsui-dark-mode .similarity-score.high {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+.awsui-dark-mode .similarity-score.medium,
+body.awsui-dark-mode .similarity-score.medium {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+}
+.awsui-dark-mode .similarity-score.low,
+body.awsui-dark-mode .similarity-score.low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.field-missing { color: var(--status-error); font-style: italic; font-size: 14px; }
 .field-low-confidence { border-left: 3px solid var(--status-warning) !important; padding-left: 8px; }
+
+/* ── Cloudscape Modal Dark Mode Overrides ───────────────────────────────── */
+.awsui-dark-mode [class*="awsui_root_"][class*="awsui_hidden_"] {
+  display: none !important;
+}
+
+.awsui-dark-mode [class*="awsui_dialog_"],
+body.awsui-dark-mode [class*="awsui_dialog_"] {
+  color: var(--text-primary) !important;
+}
+
+.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_container_"],
+body.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_container_"] {
+  background-color: #141f30 !important;
+  color: #f8fafc !important;
+  border: 1px solid #243247 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 12px !important;
+}
+
+.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_header_"],
+body.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_header_"] {
+  background-color: #141f30 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #243247 !important;
+}
+
+.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_content_"],
+body.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_content_"] {
+  background-color: #141f30 !important;
+  color: #f1f5f9 !important;
+}
+
+.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_footer_"],
+body.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_footer_"] {
+  background-color: #141f30 !important;
+  border-top: 1px solid #243247 !important;
+}
+
+/* Close/Dismiss button in dialog */
+.awsui-dark-mode [class*="awsui_dismiss-control_"] button,
+body.awsui-dark-mode [class*="awsui_dismiss-control_"] button {
+  color: #94a3b8 !important;
+}
+.awsui-dark-mode [class*="awsui_dismiss-control_"] button:hover,
+body.awsui-dark-mode [class*="awsui_dismiss-control_"] button:hover {
+  color: #f8fafc !important;
+  background-color: #1e293b !important;
+}
+
+/* Nested Cloudscape containers inside modal (e.g. Rule Compiler & Sandbox) */
+.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_content_"] [class*="awsui_container_"] {
+  background-color: #0d1522 !important;
+  border: 1px solid #243247 !important;
+}
+.awsui-dark-mode [class*="awsui_dialog_"] [class*="awsui_content_"] [class*="awsui_container_"] [class*="awsui_header_"] {
+  background-color: #0d1522 !important;
+  border-bottom: 1px solid #243247 !important;
+}
+
+

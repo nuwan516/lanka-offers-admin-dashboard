@@ -13,6 +13,7 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
 import Alert from '@cloudscape-design/components/alert';
+import PageLayout from '../components/PageLayout';
 
 interface ScheduleEntry {
   id: string;
@@ -76,15 +77,13 @@ export default function SchedulePage() {
   }
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Cron-based schedules for all pipeline automation tasks"
-        counter={`(${enabled}/${schedules.length} active)`}
-        actions={<Button variant="primary" onClick={() => setAddModal(true)}>Add schedule</Button>}
-      >
-        Schedule
-      </Header>
+    <PageLayout
+      title="Schedule"
+      description="Cron-based schedules for all pipeline automation tasks"
+      counter={`(${enabled}/${schedules.length} active)`}
+      breadcrumbs={[{ text: 'Schedule', href: '/schedule' }]}
+      actions={<Button variant="primary" onClick={() => setAddModal(true)}>Add schedule</Button>}
+    >
 
       {runAlert && (
         <Alert type="success" dismissible onDismiss={() => setRunAlert(null)}>{runAlert}</Alert>
@@ -209,6 +208,6 @@ export default function SchedulePage() {
           </FormField>
         </SpaceBetween>
       </Modal>
-    </SpaceBetween>
+    </PageLayout>
   );
 }

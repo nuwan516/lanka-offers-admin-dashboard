@@ -7,7 +7,6 @@ import Grid from '@cloudscape-design/components/grid';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import Alert from '@cloudscape-design/components/alert';
-import BreadcrumbGroup from '@cloudscape-design/components/breadcrumb-group';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import ExpandableSection from '@cloudscape-design/components/expandable-section';
 import Spinner from '@cloudscape-design/components/spinner';
@@ -15,6 +14,7 @@ import Input from '@cloudscape-design/components/input';
 import FormField from '@cloudscape-design/components/form-field';
 import Table from '@cloudscape-design/components/table';
 import Badge from '@cloudscape-design/components/badge';
+import PageLayout from '../components/PageLayout';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -273,29 +273,20 @@ export default function OfferReviewWorkspacePage() {
   const reviewStatus = hasPending ? String(offer.pending_lifecycle_status ?? 'REVIEW_REQUIRED') : status;
 
   return (
-    <SpaceBetween size="m">
-      <BreadcrumbGroup
-        items={[
-          { text: 'Overview', href: '/' },
-          { text: 'Review queue', href: '/review-queue' },
-          { text: String(offer.title ?? offer.unique_id), href: '#' },
-        ]}
-        onFollow={e => { e.preventDefault(); navigate(e.detail.href); }}
-      />
-
-      <Header
-        variant="h1"
-        description={`${String(offer.bank).toUpperCase()} · ${offer.unique_id} · source: ${String(offer.source_url ?? 'n/a')}`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <StatusIndicator type={STATUS_TYPE[status] ?? 'info'}>{status}</StatusIndicator>
-            <Button onClick={() => navigate('/review-queue')}>Back to queue</Button>
-          </SpaceBetween>
-        }
-      >
-        {String(offer.title)}
-      </Header>
-
+    <PageLayout
+      title={String(offer.title)}
+      description={`${String(offer.bank).toUpperCase()} · ${offer.unique_id} · source: ${String(offer.source_url ?? 'n/a')}`}
+      breadcrumbs={[
+        { text: 'Review queue', href: '/review-queue' },
+        { text: String(offer.title ?? offer.unique_id), href: '#' },
+      ]}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <StatusIndicator type={STATUS_TYPE[status] ?? 'info'}>{status}</StatusIndicator>
+          <Button onClick={() => navigate('/review-queue')}>Back to queue</Button>
+        </SpaceBetween>
+      }
+    >
       {actionError && (
         <Alert type="error" header="Action failed" dismissible onDismiss={() => setActionError(null)}>
           {actionError}
@@ -563,6 +554,6 @@ export default function OfferReviewWorkspacePage() {
           />
         </Container>
       </Grid>
-    </SpaceBetween>
+    </PageLayout>
   );
 }

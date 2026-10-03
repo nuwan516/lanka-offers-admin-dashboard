@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@cloudscape-design/components/header';
-import SpaceBetween from '@cloudscape-design/components/space-between';
 import Box from '@cloudscape-design/components/box';
 import Table from '@cloudscape-design/components/table';
 import TextFilter from '@cloudscape-design/components/text-filter';
 import Pagination from '@cloudscape-design/components/pagination';
 import Button from '@cloudscape-design/components/button';
-import Alert from '@cloudscape-design/components/alert';
 import ExpandableSection from '@cloudscape-design/components/expandable-section';
+import PageLayout from '../components/PageLayout';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -28,17 +27,17 @@ export default function RawEvidencePage() {
   const pageItems = offers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Raw scraped offer data from Neon Postgres (raw_offer JSONB column)"
-        counter={loading ? undefined : `(${offers.length})`}
-        actions={<Button onClick={() => navigate('/offers')}>All offers</Button>}
-      >
-        Raw evidence
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Raw Evidence"
+      description="Raw scraped offer data from Neon Postgres (raw_offer JSONB column)"
+      counter={loading ? undefined : `(${offers.length})`}
+      breadcrumbs={[
+        { text: 'Offers', href: '/offers' },
+        { text: 'Raw evidence', href: '/raw-evidence' },
+      ]}
+      actions={<Button onClick={() => navigate('/offers')}>All offers</Button>}
+      error={error}
+    >
 
       <TextFilter
         filteringText={search}
@@ -95,6 +94,6 @@ export default function RawEvidencePage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

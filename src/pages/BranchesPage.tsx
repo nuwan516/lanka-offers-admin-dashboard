@@ -6,7 +6,6 @@ import Box from '@cloudscape-design/components/box';
 import Table from '@cloudscape-design/components/table';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Button from '@cloudscape-design/components/button';
-import Alert from '@cloudscape-design/components/alert';
 import Container from '@cloudscape-design/components/container';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Select from '@cloudscape-design/components/select';
@@ -17,6 +16,7 @@ import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 import { mockBranches } from '../mock-data';
 import type { Branch } from '../types';
+import PageLayout from '../components/PageLayout';
 
 export default function BranchesPage() {
   const navigate = useNavigate();
@@ -93,24 +93,19 @@ export default function BranchesPage() {
   const unverifiedCount = branches.filter(b => b.status !== 'Active').length;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Physical retail branches and geocoded merchant locations in Sri Lanka"
-        counter={loading ? undefined : `(${branches.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button variant="primary" onClick={() => navigate('/geo-map')}>
-              Open Interactive Geo Map
-            </Button>
-          </SpaceBetween>
-        }
-      >
-        Merchant Branches
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Merchant Branches"
+      description="Physical retail branches and geocoded merchant locations in Sri Lanka"
+      counter={loading ? undefined : `(${branches.length})`}
+      breadcrumbs={[{ text: 'Banks', href: '/branches' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button variant="primary" onClick={() => navigate('/geo-map')}>Open Interactive Geo Map</Button>
+        </SpaceBetween>
+      }
+    >
 
       {/* Summary Metrics */}
       <Container header={<Header variant="h2">Branch Network Summary</Header>}>
@@ -248,6 +243,6 @@ export default function BranchesPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

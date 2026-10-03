@@ -12,6 +12,7 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Spinner from '@cloudscape-design/components/spinner';
 import { api, type ApiScrapeRun } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 function duration(run: ApiScrapeRun): string {
   if (!run.finished_at) return run.status === 'running' ? 'Running…' : '—';
@@ -80,24 +81,21 @@ export default function JobsPage() {
   const failedToday = todayRuns.filter(r => r.status === 'failed').length;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Scraper job history and active status from Neon Postgres"
-        counter={runsLoading ? undefined : `(${items.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={() => { refetchRuns(); refetchStatus(); }} loading={runsLoading || statusLoading}>
-              Refresh
-            </Button>
-            <Button variant="primary" onClick={() => navigate('/run-scraper')}>New job</Button>
-          </SpaceBetween>
-        }
-      >
-        Jobs
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Jobs"
+      description="Scraper job history and active status from Neon Postgres"
+      counter={runsLoading ? undefined : `(${items.length})`}
+      breadcrumbs={[{ text: 'Jobs', href: '/jobs' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={() => { refetchRuns(); refetchStatus(); }} loading={runsLoading || statusLoading}>
+            Refresh
+          </Button>
+          <Button variant="primary" onClick={() => navigate('/run-scraper')}>New job</Button>
+        </SpaceBetween>
+      }
+    >
       {actionMessage && (
         <Alert
           type={actionMessage.type}
@@ -280,6 +278,6 @@ export default function JobsPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

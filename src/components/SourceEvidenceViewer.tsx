@@ -19,7 +19,7 @@ export default function SourceEvidenceViewer({ evidence }: Props) {
               label: 'Extracted Text',
               content: (
                 <Box padding="s">
-                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 12, whiteSpace: 'pre-wrap', background: '#f8f9fa', border: '1px solid #D5D9D9', borderRadius: 4, padding: 12 }}>
+                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 13, whiteSpace: 'pre-wrap', background: 'var(--code-bg)', color: 'var(--code-text)', border: '1px solid var(--code-border)', borderRadius: 4, padding: 12 }}>
                     {evidence.extractedText || '(no extracted text)'}
                   </pre>
                 </Box>
@@ -30,7 +30,7 @@ export default function SourceEvidenceViewer({ evidence }: Props) {
               label: 'HTML',
               content: (
                 <Box padding="s">
-                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 11, whiteSpace: 'pre-wrap', background: '#f8f9fa', border: '1px solid #D5D9D9', borderRadius: 4, padding: 12, maxHeight: 300, overflow: 'auto' }}>
+                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 12, whiteSpace: 'pre-wrap', background: 'var(--code-bg)', color: 'var(--code-text)', border: '1px solid var(--code-border)', borderRadius: 4, padding: 12, maxHeight: 300, overflow: 'auto' }}>
                     {evidence.rawHtml || '(not available for this source type)'}
                   </pre>
                 </Box>
@@ -41,7 +41,7 @@ export default function SourceEvidenceViewer({ evidence }: Props) {
               label: 'JSON/API',
               content: (
                 <Box padding="s">
-                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 11, whiteSpace: 'pre-wrap', background: '#f8f9fa', border: '1px solid #D5D9D9', borderRadius: 4, padding: 12, maxHeight: 300, overflow: 'auto' }}>
+                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 12, whiteSpace: 'pre-wrap', background: 'var(--code-bg)', color: 'var(--code-text)', border: '1px solid var(--code-border)', borderRadius: 4, padding: 12, maxHeight: 300, overflow: 'auto' }}>
                     {evidence.rawJson
                       ? JSON.stringify(JSON.parse(evidence.rawJson), null, 2)
                       : '(not available for this source type)'}
@@ -54,7 +54,7 @@ export default function SourceEvidenceViewer({ evidence }: Props) {
               label: 'PDF Text',
               content: (
                 <Box padding="s">
-                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 12, whiteSpace: 'pre-wrap', background: '#f8f9fa', border: '1px solid #D5D9D9', borderRadius: 4, padding: 12 }}>
+                  <pre style={{ fontFamily: 'Courier New, monospace', fontSize: 13, whiteSpace: 'pre-wrap', background: 'var(--code-bg)', color: 'var(--code-text)', border: '1px solid var(--code-border)', borderRadius: 4, padding: 12 }}>
                     {evidence.pdfText || '(no PDF text for this record)'}
                   </pre>
                 </Box>
@@ -65,7 +65,7 @@ export default function SourceEvidenceViewer({ evidence }: Props) {
               label: 'Source Metadata',
               content: (
                 <Box padding="s">
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                     <tbody>
                       {[
                         ['Raw ID', evidence.id],
@@ -79,9 +79,9 @@ export default function SourceEvidenceViewer({ evidence }: Props) {
                         ['Run ID', evidence.runId],
                         ['Checksum', evidence.checksum],
                       ].map(([k, v]) => (
-                        <tr key={k} style={{ borderBottom: '1px solid #F0F2F2' }}>
-                          <td style={{ padding: '6px 8px', color: '#565959', fontWeight: 600, width: '35%' }}>{k}</td>
-                          <td style={{ padding: '6px 8px', color: '#0F1111', wordBreak: 'break-all' }}>{v}</td>
+                        <tr key={k} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-secondary)', fontWeight: 600, width: '35%' }}>{k}</td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-primary)', wordBreak: 'break-all' }}>{v}</td>
                         </tr>
                       ))}
                     </tbody>

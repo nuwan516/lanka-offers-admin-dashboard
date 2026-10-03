@@ -14,6 +14,7 @@ import Badge from '@cloudscape-design/components/badge';
 import Modal from '@cloudscape-design/components/modal';
 import FormField from '@cloudscape-design/components/form-field';
 import Input from '@cloudscape-design/components/input';
+import PageLayout from '../components/PageLayout';
 import { api, type ApiDuplicateCandidate } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -121,16 +122,13 @@ export default function DuplicateDetectionPage() {
   const items = data?.items ?? [];
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Deterministic duplicate candidates — same-bank matches only, never auto-merged or auto-deleted without admin decision"
-        actions={<Button onClick={refetch}>Refresh</Button>}
-      >
-        Duplicate review
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Duplicate Review"
+      description="Deterministic duplicate candidates — same-bank matches only, never auto-merged or auto-deleted without admin decision"
+      breadcrumbs={[{ text: 'Duplicate detection', href: '/duplicates' }]}
+      actions={<Button onClick={refetch}>Refresh</Button>}
+      error={error}
+    >
       {actionError && <Alert type="error" header="Action failed" dismissible onDismiss={() => setActionError(null)}>{actionError}</Alert>}
       {actionSuccess && <Alert type="success" header="Operation succeeded" dismissible onDismiss={() => setActionSuccess(null)}>{actionSuccess}</Alert>}
 
@@ -249,6 +247,6 @@ export default function DuplicateDetectionPage() {
           </FormField>
         </SpaceBetween>
       </Modal>
-    </SpaceBetween>
+    </PageLayout>
   );
 }

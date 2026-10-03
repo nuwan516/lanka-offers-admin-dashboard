@@ -12,6 +12,8 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Alert from '@cloudscape-design/components/alert';
 import Table from '@cloudscape-design/components/table';
 import Box from '@cloudscape-design/components/box';
+import PageLayout from '../components/PageLayout';
+import { useTheme } from '../hooks/useTheme';
 
 const BANKS = ['HNB', 'BOC', 'SAMPATH', 'NDB', 'DFCC', 'SEYLAN', 'PEOPLES', 'PABC', 'NSB', 'COMBANK'];
 
@@ -24,6 +26,7 @@ const ALERT_TRIGGERS = [
 ];
 
 export default function SettingsPage() {
+  const { isDark, setMode } = useTheme();
   const [env, setEnv] = useState<any>({ label: 'Production', value: 'production' });
   const [scrapeTimeout, setScrapeTimeout] = useState('30');
   const [concurrency, setConcurrency]     = useState('3');
@@ -48,10 +51,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <SpaceBetween size="l">
-      <Header variant="h1" description="System-wide configuration for the Lanka Offers pipeline">
-        Settings
-      </Header>
+    <PageLayout
+      title="Settings"
+      description="System-wide configuration for the Lanka Offers pipeline"
+      breadcrumbs={[{ text: 'Settings', href: '/settings' }]}
+    >
 
       <Tabs
         tabs={[
@@ -61,6 +65,22 @@ export default function SettingsPage() {
             label: 'General',
             content: (
               <SpaceBetween size="m">
+                <Container header={<Header variant="h2">Appearance &amp; Theme</Header>}>
+                  <SpaceBetween size="m">
+                    <FormField
+                      label="Theme mode"
+                      description="Switch between Cloudscape visual refresh dark theme and light theme. Setting is saved in local browser storage."
+                    >
+                      <Toggle
+                        checked={isDark}
+                        onChange={({ detail }) => setMode(detail.checked ? 'dark' : 'light')}
+                      >
+                        {isDark ? 'Dark mode (Active)' : 'Light mode (Active)'}
+                      </Toggle>
+                    </FormField>
+                  </SpaceBetween>
+                </Container>
+
                 <Container header={<Header variant="h2">Environment</Header>}>
                   <SpaceBetween size="m">
                     <FormField label="Active environment">
@@ -292,6 +312,6 @@ export default function SettingsPage() {
           },
         ]}
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

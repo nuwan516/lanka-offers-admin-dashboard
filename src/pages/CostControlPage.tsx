@@ -1,15 +1,14 @@
 import Header from '@cloudscape-design/components/header';
 import Container from '@cloudscape-design/components/container';
-import SpaceBetween from '@cloudscape-design/components/space-between';
 import Box from '@cloudscape-design/components/box';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
 import Button from '@cloudscape-design/components/button';
 import { api, type ApiCostControlService } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 const STATE_TO_INDICATOR: Record<ApiCostControlService['state'], 'success' | 'warning' | 'error'> = {
   ALLOW: 'success',
@@ -28,16 +27,13 @@ export default function CostControlPage() {
   const { data, loading, error, refetch } = useApi(() => api.costControlStatus(), []);
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Zero-cost control layer — quota usage, LLM provider policy, and kill switches"
-        actions={<Button onClick={refetch} iconName="refresh">Refresh</Button>}
-      >
-        Cost Control
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Cost Control"
+      description="Zero-cost control layer — quota usage, LLM provider policy, and kill switches"
+      breadcrumbs={[{ text: 'Cost control', href: '/cost-control' }]}
+      error={error}
+      actions={<Button onClick={refetch} iconName="refresh">Refresh</Button>}
+    >
 
       <Container header={<Header variant="h2">Provider policy</Header>}>
         {loading ? <Spinner /> : (
@@ -112,6 +108,6 @@ export default function CostControlPage() {
         items={data?.services ?? []}
         variant="embedded"
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

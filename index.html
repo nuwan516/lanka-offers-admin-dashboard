@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>admin</title>
+    <title>Lanka Offers Admin</title>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('lanka_offers_admin_theme') || 'dark';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('awsui-dark-mode');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

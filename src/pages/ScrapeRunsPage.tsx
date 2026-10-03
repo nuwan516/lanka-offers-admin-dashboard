@@ -10,6 +10,7 @@ import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Alert from '@cloudscape-design/components/alert';
 import { api, type ApiScrapeRun } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 const BANKS = ['HNB', 'BOC', 'SAMPATH', 'NDB', 'DFCC', 'SEYLAN', 'PEOPLES', 'PABC', 'NSB', 'COMBANK'];
 
@@ -75,22 +76,19 @@ export default function ScrapeRunsPage() {
   const runs = data?.items ?? [];
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="History of all scraper executions"
-        counter={loading ? undefined : `(${runs.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button variant="primary" onClick={() => navigate('/run-scraper')}>New run</Button>
-          </SpaceBetween>
-        }
-      >
-        Scrape runs
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Scrape runs"
+      description="History of all scraper executions"
+      counter={loading ? undefined : `(${runs.length})`}
+      breadcrumbs={[{ text: 'Scrape runs', href: '/runs' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button variant="primary" onClick={() => navigate('/run-scraper')}>New run</Button>
+        </SpaceBetween>
+      }
+    >
       {actionMessage && (
         <Alert
           type={actionMessage.type}
@@ -231,6 +229,6 @@ export default function ScrapeRunsPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

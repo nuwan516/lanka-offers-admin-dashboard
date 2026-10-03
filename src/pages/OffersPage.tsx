@@ -9,11 +9,11 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Button from '@cloudscape-design/components/button';
 import Box from '@cloudscape-design/components/box';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Badge from '@cloudscape-design/components/badge';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 const PAGE_SIZE = 15;
 
@@ -52,17 +52,14 @@ export default function OffersPage() {
   const total = data?.total ?? 0;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="All scraped offers from Neon Postgres"
-        counter={loading ? undefined : `(${total})`}
-        actions={<Button onClick={refetch}>Refresh</Button>}
-      >
-        Offers
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Offers"
+      description="All scraped offers from Neon Postgres"
+      counter={loading ? undefined : `(${total})`}
+      breadcrumbs={[{ text: 'Offers', href: '/offers' }]}
+      error={error}
+      actions={<Button onClick={refetch}>Refresh</Button>}
+    >
 
       <SpaceBetween direction="horizontal" size="s">
         <TextFilter
@@ -187,6 +184,6 @@ export default function OffersPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }
