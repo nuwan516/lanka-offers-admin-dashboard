@@ -490,6 +490,28 @@ export interface ApiCostControlStatus {
   periodKey: string | null;
 }
 
+export interface ApiGeoStats {
+  totalOffers: number;
+  offersWithGeom: number;
+  offersWithoutGeom: number;
+  coveragePercent: number;
+  byBank: Array<{ bank: string; total: number; withGeom: number; coveragePercent: number }>;
+  byLocationScope: Array<{ scope: string; count: number; withGeom: number }>;
+}
+
+export interface ApiNearbyOffer {
+  id: string;
+  bank: string;
+  title: string;
+  merchant_name: string | null;
+  discount_percentage: string | null;
+  valid_to: string | null;
+  location_scope: string | null;
+  geo_locations: Array<Record<string, unknown>>;
+  distance_km: number;
+  geom: string | null;
+}
+
 export interface ApiBacktestResult {
   errors: Array<{ field: string; message: string; hit_count: string }>;
   warnings: Array<{ field: string; message: string; hit_count: string }>;
@@ -683,6 +705,15 @@ export const api = {
 
   costControlStatus: () =>
     get<ApiCostControlStatus>('/cost-control/status'),
+
+  geoNearby: (params: { lat: number; lng: number; radius?: number; limit?: number }) =>
+    get<{ items: ApiNearbyOffer[]; total: number }>('/geo/nearby', params),
+
+  geoStats: () =>
+    get<ApiGeoStats>('/geo/stats'),
+
+  geoBackfill: (bank?: string) =>
+    post<{ message: string; processed: number; updated: number }>('/geo/backfill', bank ? { bank } : {}),
 };
 
 

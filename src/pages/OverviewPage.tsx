@@ -11,7 +11,7 @@ import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
 import Badge from '@cloudscape-design/components/badge';
-import { api, type ApiScrapeRun, type ApiBankSummary } from '../services/api';
+import { api, type ApiScrapeRun, type ApiBankSummary, type ApiGeoStats } from '../services/api';
 import { useApi } from '../services/use-api';
 
 function Metric({ label, value, loading }: { label: string; value: string | number; loading: boolean }) {
@@ -28,6 +28,7 @@ export default function OverviewPage() {
   const { data: stats, loading, error, refetch } = useApi(() => api.stats(), []);
   const { data: banks, loading: banksLoading } = useApi(() => api.banks(), []);
   const { data: runs, loading: runsLoading } = useApi(() => api.runs({ limit: 5 }), []);
+  const { data: geoStats, loading: geoStatsLoading } = useApi<ApiGeoStats>(() => api.geoStats(), []);
 
   const o = stats?.offers;
   const r = stats?.runs;
@@ -132,6 +133,31 @@ export default function OverviewPage() {
               {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{o?.llm_scored ?? '0'}</Box>}
             </div>
           </ColumnLayout>
+        </Container>
+
+        <Container header={<Header variant="h2" description="PostGIS spatial coverage">Geo Coverage</Header>}>
+          {geoStatsLoading ? <Spinner /> : geoStats ? (
+            <ColumnLayout columns={2} variant="text-grid">
+              <div>
+                <Box variant="awsui-key-label">Total offers</Box>
+                <Box variant="awsui-value-large">{geoStats.totalOffers}</Box>
+              </div>
+              <div>
+                <Box variant="awsui-key-label">With geometry</Box>
+                <StatusIndicator type="success">{geoStats.offersWithGeom}</StatusIndicator>
+              </div>
+              <div>
+                <Box variant="awsui-key-label">Coverage</Box>
+                <Box variant="awsui-value-large">{geoStats.coveragePercent.toFixed(1)}%</Box>
+              </div>
+              <div>
+                <Box variant="awsui-key-label">Without geometry</Box>
+                <StatusIndicator type={geoStats.offersWithoutGeom > 0 ? 'warning' : 'success'}>{geoStats.offersWithoutGeom}</StatusIndicator>
+              </div>
+            </ColumnLayout>
+          ) : (
+            <Box color="text-body-secondary">Unable to load geo statistics</Box>
+          )}
         </Container>
 
         <Container header={<Header variant="h2" description="Deterministic same-bank candidate matcher">Duplicate Detection</Header>}>

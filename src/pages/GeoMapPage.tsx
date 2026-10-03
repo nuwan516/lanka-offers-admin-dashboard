@@ -121,15 +121,16 @@ function extractGeoMarkers(offers: ApiOffer[]): MapMarker[] {
 export default function GeoMapPage() {
   const navigate = useNavigate();
   const [bankFilter, setBankFilter] = useState<any>({ label: 'All banks', value: '' });
+
   const { data, loading, error, refetch } = useApi(
     () => api.offers({ bank: bankFilter.value || undefined, limit: 500 }),
     [bankFilter.value]
   );
 
+  const { data: geoStats, loading: geoStatsLoading } = useApi(() => api.geoStats(), []);
+
   const offers = data?.items ?? [];
   const markers = useMemo(() => extractGeoMarkers(offers), [offers]);
-  const withGeo = offers.filter(o => Array.isArray(o.geo_locations) && o.geo_locations.length > 0);
-  const withCity = offers.filter(o => !o.geo_locations?.length && o.merchant_location && cityFromText(o.merchant_location));
   const unresolved = offers.filter(o => !o.geo_locations?.length && (!o.merchant_location || !cityFromText(o.merchant_location)));
 
   const merchantLocationRows = useMemo(() => {
@@ -165,26 +166,28 @@ export default function GeoMapPage() {
         placeholder="Filter by bank"
       />
 
-      <Container header={<Header variant="h2">Coverage</Header>}>
-        {loading ? <Spinner /> : (
+      <Container header={<Header variant="h2">Coverage (PostGIS)</Header>}>
+        {geoStatsLoading ? <Spinner /> : geoStats ? (
           <ColumnLayout columns={4} variant="text-grid">
             <div>
               <Box variant="awsui-key-label">Total offers</Box>
-              <Box variant="awsui-value-large">{offers.length}</Box>
+              <Box variant="awsui-value-large">{geoStats.totalOffers}</Box>
             </div>
             <div>
-              <Box variant="awsui-key-label">Geocoded (lat/lng)</Box>
-              <StatusIndicator type={withGeo.length > 0 ? 'success' : 'warning'}>{withGeo.length}</StatusIndicator>
+              <Box variant="awsui-key-label">With PostGIS geometry</Box>
+              <StatusIndicator type="success">{geoStats.offersWithGeom}</StatusIndicator>
             </div>
             <div>
-              <Box variant="awsui-key-label">Mapped by city name</Box>
-              <StatusIndicator type={withCity.length > 0 ? 'info' : 'stopped'}>{withCity.length}</StatusIndicator>
+              <Box variant="awsui-key-label">Coverage</Box>
+              <Box variant="awsui-value-large">{geoStats.coveragePercent.toFixed(1)}%</Box>
             </div>
             <div>
-              <Box variant="awsui-key-label">Unresolved</Box>
-              <StatusIndicator type={unresolved.length > 0 ? 'warning' : 'success'}>{unresolved.length}</StatusIndicator>
+              <Box variant="awsui-key-label">Without geometry</Box>
+              <StatusIndicator type={geoStats.offersWithoutGeom > 0 ? 'warning' : 'success'}>{geoStats.offersWithoutGeom}</StatusIndicator>
             </div>
           </ColumnLayout>
+        ) : (
+          <Box>Unable to load geo statistics</Box>
         )}
       </Container>
 
