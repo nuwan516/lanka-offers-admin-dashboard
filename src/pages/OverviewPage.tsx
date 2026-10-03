@@ -101,6 +101,7 @@ export default function OverviewPage() {
         { colspan: { default: 12, m: 6 } },
         { colspan: { default: 12, m: 6 } },
         { colspan: { default: 12 } },
+        { colspan: { default: 12 } },
       ]}>
         <Container header={<Header variant="h2">Pipeline & Scraper Health</Header>}>
           <ColumnLayout columns={2} variant="text-grid">
@@ -148,7 +149,7 @@ export default function OverviewPage() {
               </div>
               <div>
                 <Box variant="awsui-key-label">Coverage</Box>
-                <Box variant="awsui-value-large">{geoStats.coveragePercent.toFixed(1)}%</Box>
+                <Box variant="awsui-value-large">{geoStats.coveragePercent?.toFixed(1) ?? '0'}%</Box>
               </div>
               <div>
                 <Box variant="awsui-key-label">Without geometry</Box>
