@@ -10,6 +10,7 @@ import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
+import Badge from '@cloudscape-design/components/badge';
 import { api, type ApiScrapeRun, type ApiBankSummary } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -57,9 +58,33 @@ export default function OverviewPage() {
       <Container header={<Header variant="h2">Operations metrics</Header>}>
         <ColumnLayout columns={4} variant="text-grid">
           <Metric label="Active published offers" value={o?.active_offers ?? '—'} loading={loading} />
-          <Metric label="Pending review / staging" value={o?.pending_review ?? '0'} loading={loading} />
-          <Metric label="Pending DB sync (approved)" value={o?.pending_sync ?? '0'} loading={loading} />
-          <Metric label="Unresolved geo records" value={o?.unresolved_geo ?? '0'} loading={loading} />
+          <div>
+            <Box variant="awsui-key-label">Pending review / staging</Box>
+            {loading ? <Spinner size="normal" /> : (
+              <SpaceBetween direction="horizontal" size="xs" alignItems="center">
+                <Box variant="awsui-value-large">{o?.pending_review ?? '0'}</Box>
+                {parseInt(o?.pending_review ?? '0') > 0 && <Badge color="blue">Review</Badge>}
+              </SpaceBetween>
+            )}
+          </div>
+          <div>
+            <Box variant="awsui-key-label">Pending DB sync (approved)</Box>
+            {loading ? <Spinner size="normal" /> : (
+              <SpaceBetween direction="horizontal" size="xs" alignItems="center">
+                <Box variant="awsui-value-large">{o?.pending_sync ?? '0'}</Box>
+                {parseInt(o?.pending_sync ?? '0') > 0 && <Badge color="green">Sync</Badge>}
+              </SpaceBetween>
+            )}
+          </div>
+          <div>
+            <Box variant="awsui-key-label">Unresolved geo records</Box>
+            {loading ? <Spinner size="normal" /> : (
+              <SpaceBetween direction="horizontal" size="xs" alignItems="center">
+                <Box variant="awsui-value-large">{o?.unresolved_geo ?? '0'}</Box>
+                {parseInt(o?.unresolved_geo ?? '0') > 0 && <Badge color="red">Action</Badge>}
+              </SpaceBetween>
+            )}
+          </div>
         </ColumnLayout>
         <Box margin={{ top: 'm' }}>
           <ColumnLayout columns={4} variant="text-grid">

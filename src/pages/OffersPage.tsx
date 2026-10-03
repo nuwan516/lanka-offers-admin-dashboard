@@ -11,6 +11,7 @@ import Box from '@cloudscape-design/components/box';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
+import Badge from '@cloudscape-design/components/badge';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -98,30 +99,30 @@ export default function OffersPage() {
         loadingText="Loading offers"
         columnDefinitions={[
           {
-            id: 'bank', header: 'Bank', width: 80,
+            id: 'bank', header: 'Bank', minWidth: 90,
             cell: (o: ApiOffer) => <Box fontWeight="bold">{o.bank.toUpperCase()}</Box>,
           },
           {
-            id: 'title', header: 'Title',
+            id: 'title', header: 'Title', minWidth: 200,
             cell: (o: ApiOffer) => (
               <Button variant="link" onClick={() => navigate(`/offers/${o.id}/review`)}>
                 {o.title}
               </Button>
             ),
           },
-          { id: 'merchant', header: 'Merchant', cell: (o: ApiOffer) => o.merchant_name ?? '—' },
-          { id: 'category', header: 'Category', cell: (o: ApiOffer) => o.category ?? '—' },
-          { id: 'discount', header: 'Discount', cell: (o: ApiOffer) => o.discount_percentage ?? '—' },
+          { id: 'merchant', header: 'Merchant', minWidth: 150, cell: (o: ApiOffer) => o.merchant_name ?? '—' },
+          { id: 'category', header: 'Category', minWidth: 120, cell: (o: ApiOffer) => o.category ?? '—' },
+          { id: 'discount', header: 'Discount', minWidth: 80, cell: (o: ApiOffer) => o.discount_percentage ?? '—' },
           {
-            id: 'valid_to', header: 'Expires',
+            id: 'valid_to', header: 'Expires', minWidth: 110,
             cell: (o: ApiOffer) => o.valid_to ? new Date(o.valid_to).toLocaleDateString() : '—',
           },
           {
-            id: 'llm_score', header: 'LLM score',
+            id: 'llm_score', header: 'LLM score', minWidth: 90,
             cell: (o: ApiOffer) => o.llm_score != null ? `${o.llm_score}/100` : '—',
           },
           {
-            id: 'rule_passed', header: 'Validation',
+            id: 'rule_passed', header: 'Validation', minWidth: 120,
             cell: (o: ApiOffer) => (
               <StatusIndicator type={o.rule_passed ? 'success' : 'error'}>
                 {o.rule_passed ? 'Passed' : `${o.rule_errors?.length ?? 1} error(s)`}
@@ -129,20 +130,50 @@ export default function OffersPage() {
             ),
           },
           {
-            id: 'db_status', header: 'Status',
-            cell: (o: ApiOffer) => (
-              <StatusIndicator type={STATUS_TYPE[o.db_status] ?? 'info'}>{o.db_status}</StatusIndicator>
-            ),
+            id: 'db_status', header: 'Status', minWidth: 120,
+            cell: (o: ApiOffer) => {
+              const statusType = STATUS_TYPE[o.db_status] ?? 'info';
+              const badgeColor = statusType === 'success' ? 'green' : statusType === 'warning' ? 'blue' : statusType === 'error' ? 'red' : 'grey';
+              return (
+                <SpaceBetween direction="horizontal" size="xs" alignItems="center">
+                  <StatusIndicator type={statusType}>{o.db_status}</StatusIndicator>
+                  <Badge color={badgeColor}>{o.db_status}</Badge>
+                </SpaceBetween>
+              );
+            },
           },
           {
-            id: 'updated_at', header: 'Updated',
+            id: 'updated_at', header: 'Updated', minWidth: 110,
             cell: (o: ApiOffer) => new Date(o.updated_at).toLocaleDateString(),
           },
         ]}
         items={offers}
         empty={
           <Box textAlign="center" color="inherit" padding={{ vertical: 'xxl' }}>
-            {loading ? <Spinner /> : error ? 'API unavailable' : 'No offers found. Run a scraper to import data.'}
+            {loading ? (
+              <Spinner />
+            ) : error ? (
+              <Box>
+                <Box variant="p" color="text-status-error">
+                  API unavailable
+                </Box>
+                <Box variant="small" color="text-body-secondary" padding={{ top: 'xs' }}>
+                  Cannot reach the backend API. Ensure the API server is running.
+                </Box>
+              </Box>
+            ) : (
+              <Box>
+                <Box variant="p">No offers found</Box>
+                <Box variant="small" color="text-body-secondary" padding={{ top: 'xs' }}>
+                  Run a scraper to import data from banks
+                </Box>
+                <Box padding={{ top: 's' }}>
+                  <Button variant="primary" onClick={() => navigate('/run-scraper')}>
+                    Run scraper
+                  </Button>
+                </Box>
+              </Box>
+            )}
           </Box>
         }
         header={<Header variant="h2" counter={`(${total})`}>Offer list</Header>}

@@ -3,6 +3,10 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import CloudscapeAppLayout from '@cloudscape-design/components/app-layout';
 import SideNavigation, { type SideNavigationProps } from '@cloudscape-design/components/side-navigation';
 import TopNavigation from '@cloudscape-design/components/top-navigation';
+import HelpPanel from '@cloudscape-design/components/help-panel';
+import Box from '@cloudscape-design/components/box';
+import SpaceBetween from '@cloudscape-design/components/space-between';
+import Link from '@cloudscape-design/components/link';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -63,6 +67,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [navOpen, setNavOpen] = useState(true);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   const { data: stats } = useApi(() => api.stats(), []);
   const runningJobs = parseInt(stats?.runs.running_jobs ?? '0');
@@ -81,7 +86,7 @@ export default function AppLayout() {
             },
             {
               type: 'menu-dropdown',
-              text: 'Nuwan',
+              text: 'Admin',
               iconName: 'user-profile',
               items: [
                 { id: 'settings', text: 'Settings' },
@@ -108,7 +113,44 @@ export default function AppLayout() {
         }
         navigationOpen={navOpen}
         onNavigationChange={e => setNavOpen(e.detail.open)}
-        toolsHide
+        toolsOpen={toolsOpen}
+        onToolsChange={e => setToolsOpen(e.detail.open)}
+        tools={
+          <HelpPanel
+            header={<h2>Help & Resources</h2>}
+            footer={
+              <Box variant="small" color="text-body-secondary">
+                Lanka Offers Admin v1.0
+              </Box>
+            }
+          >
+            <SpaceBetween size="m">
+              <Box>
+                <Box variant="h3">Quick links</Box>
+                <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
+                  <li style={{ marginBottom: '8px' }}>
+                    <Link href="#" onClick={() => navigate('/runs')}>Scrape runs</Link>
+                  </li>
+                  <li style={{ marginBottom: '8px' }}>
+                    <Link href="#" onClick={() => navigate('/offers')}>All offers</Link>
+                  </li>
+                  <li style={{ marginBottom: '8px' }}>
+                    <Link href="#" onClick={() => navigate('/duplicates')}>Duplicate detection</Link>
+                  </li>
+                  <li style={{ marginBottom: '8px' }}>
+                    <Link href="#" onClick={() => navigate('/settings')}>Settings</Link>
+                  </li>
+                </ul>
+              </Box>
+              <Box>
+                <Box variant="h3">Documentation</Box>
+                <Box variant="p" color="text-body-secondary">
+                  View the architecture documentation for detailed information about the data pipeline.
+                </Box>
+              </Box>
+            </SpaceBetween>
+          </HelpPanel>
+        }
         content={<Outlet />}
       />
     </>

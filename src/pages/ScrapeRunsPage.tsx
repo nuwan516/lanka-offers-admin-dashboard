@@ -129,7 +129,7 @@ export default function ScrapeRunsPage() {
         onRowClick={e => navigate(`/runs/${e.detail.item.id}`)}
         columnDefinitions={[
           {
-            id: 'bank', header: 'Bank', width: 100,
+            id: 'bank', header: 'Bank', minWidth: 100,
             cell: (r: ApiScrapeRun) => <Box fontWeight="bold">{r.bank.toUpperCase()}</Box>,
           },
           {
@@ -147,29 +147,29 @@ export default function ScrapeRunsPage() {
               </SpaceBetween>
             ),
           },
-          { id: 'mode', header: 'Mode', cell: (r: ApiScrapeRun) => r.mode },
-          { id: 'triggered_by', header: 'Triggered by', cell: (r: ApiScrapeRun) => r.triggered_by },
+          { id: 'mode', header: 'Mode', minWidth: 80, cell: (r: ApiScrapeRun) => r.mode },
+          { id: 'triggered_by', header: 'Triggered by', minWidth: 120, cell: (r: ApiScrapeRun) => r.triggered_by },
           {
-            id: 'started_at', header: 'Started',
+            id: 'started_at', header: 'Started', minWidth: 160,
             cell: (r: ApiScrapeRun) => new Date(r.started_at).toLocaleString(),
           },
-          { id: 'duration', header: 'Duration', cell: duration },
+          { id: 'duration', header: 'Duration', minWidth: 90, cell: duration },
           {
-            id: 'offers_found', header: 'Found',
+            id: 'offers_found', header: 'Found', minWidth: 70,
             cell: (r: ApiScrapeRun) => r.offers_found ?? '—',
           },
           {
-            id: 'offers_new', header: 'New',
+            id: 'offers_new', header: 'New', minWidth: 70,
             cell: (r: ApiScrapeRun) => r.offers_new ?? '—',
           },
           {
-            id: 'errors', header: 'Errors',
+            id: 'errors', header: 'Errors', minWidth: 70,
             cell: (r: ApiScrapeRun) => r.errors > 0
               ? <StatusIndicator type="error">{r.errors}</StatusIndicator>
               : <StatusIndicator type="success">0</StatusIndicator>,
           },
           {
-            id: 'actions', header: 'Actions',
+            id: 'actions', header: 'Actions', minWidth: 100,
             cell: (r: ApiScrapeRun) => (
               <SpaceBetween direction="horizontal" size="xxs">
                 {r.status === 'running' && (
@@ -203,7 +203,28 @@ export default function ScrapeRunsPage() {
         items={runs}
         empty={
           <Box textAlign="center" color="inherit" padding={{ vertical: 'xxl' }}>
-            {error ? 'API unavailable' : 'No scrape runs found. Start a scraper to create records.'}
+            {error ? (
+              <Box>
+                <Box variant="p" color="text-status-error">
+                  API unavailable
+                </Box>
+                <Box variant="small" color="text-body-secondary" padding={{ top: 'xs' }}>
+                  Cannot reach the backend API. Ensure the API server is running.
+                </Box>
+              </Box>
+            ) : (
+              <Box>
+                <Box variant="p">No scrape runs found</Box>
+                <Box variant="small" color="text-body-secondary" padding={{ top: 'xs' }}>
+                  Start a scraper to create run records
+                </Box>
+                <Box padding={{ top: 's' }}>
+                  <Button variant="primary" onClick={() => navigate('/run-scraper')}>
+                    New run
+                  </Button>
+                </Box>
+              </Box>
+            )}
           </Box>
         }
         header={<Header variant="h2" counter={`(${runs.length})`}>Run history</Header>}
