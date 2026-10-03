@@ -101,7 +101,6 @@ export default function OverviewPage() {
         { colspan: { default: 12, m: 6 } },
         { colspan: { default: 12, m: 6 } },
         { colspan: { default: 12 } },
-        { colspan: { default: 12 } },
       ]}>
         <Container header={<Header variant="h2">Pipeline & Scraper Health</Header>}>
           <ColumnLayout columns={2} variant="text-grid">
@@ -184,19 +183,20 @@ export default function OverviewPage() {
             <Button variant="link" onClick={() => navigate('/duplicates')}>Open duplicate candidate queue</Button>
           </Box>
         </Container>
+      </Grid>
 
+      <Container header={
+        <Header
+          variant="h2"
+          actions={<Button variant="link" onClick={() => navigate('/runs')}>View all</Button>}
+        >
+          Recent scrape runs
+        </Header>
+      }>
         <Table
           loading={runsLoading}
           loadingText="Loading runs"
           onRowClick={e => navigate(`/runs/${e.detail.item.id}`)}
-          header={
-            <Header
-              variant="h2"
-              actions={<Button variant="link" onClick={() => navigate('/runs')}>View all</Button>}
-            >
-              Recent scrape runs
-            </Header>
-          }
           columnDefinitions={[
             {
               id: 'bank', header: 'Bank', width: 90,
@@ -242,7 +242,7 @@ export default function OverviewPage() {
           }
           variant="embedded"
         />
-      </Grid>
+      </Container>
 
       <Table
         loading={banksLoading}

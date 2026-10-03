@@ -179,7 +179,7 @@ export default function GeoMapPage() {
             </div>
             <div>
               <Box variant="awsui-key-label">Coverage</Box>
-              <Box variant="awsui-value-large">{geoStats.coveragePercent.toFixed(1)}%</Box>
+              <Box variant="awsui-value-large">{geoStats.coveragePercent?.toFixed(1) ?? '0'}%</Box>
             </div>
             <div>
               <Box variant="awsui-key-label">Without geometry</Box>
