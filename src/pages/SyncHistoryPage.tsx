@@ -5,9 +5,9 @@ import Box from '@cloudscape-design/components/box';
 import Table from '@cloudscape-design/components/table';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Button from '@cloudscape-design/components/button';
-import Alert from '@cloudscape-design/components/alert';
 import { api, type ApiScrapeRun } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 function duration(run: ApiScrapeRun): string {
   if (!run.finished_at) return '—';
@@ -22,22 +22,19 @@ export default function SyncHistoryPage() {
   const runs = data?.items ?? [];
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Completed scrape runs from Neon Postgres"
-        counter={loading ? undefined : `(${runs.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button onClick={() => navigate('/runs')}>All runs</Button>
-          </SpaceBetween>
-        }
-      >
-        Sync history
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Sync history"
+      description="Completed scrape runs from Neon Postgres"
+      counter={loading ? undefined : `(${runs.length})`}
+      breadcrumbs={[{ text: 'Sync history', href: '/sync-history' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button onClick={() => navigate('/runs')}>All runs</Button>
+        </SpaceBetween>
+      }
+    >
 
       <Table
         loading={loading}
@@ -73,6 +70,6 @@ export default function SyncHistoryPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

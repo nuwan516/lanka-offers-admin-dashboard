@@ -6,7 +6,6 @@ import Container from '@cloudscape-design/components/container';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Spinner from '@cloudscape-design/components/spinner';
-import Alert from '@cloudscape-design/components/alert';
 import Table from '@cloudscape-design/components/table';
 import Tabs from '@cloudscape-design/components/tabs';
 import Select from '@cloudscape-design/components/select';
@@ -15,6 +14,7 @@ import FormField from '@cloudscape-design/components/form-field';
 import Badge from '@cloudscape-design/components/badge';
 import Button from '@cloudscape-design/components/button';
 import ExpandableSection from '@cloudscape-design/components/expandable-section';
+import PageLayout from '../components/PageLayout';
 import { api, type ApiScrapeRun, type ApiLogEntry } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -82,30 +82,22 @@ export default function LogsPage() {
   const warnLogsCount = logs.filter(l => l.level === 'warn').length;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Structured operational pipeline events and scrape run history"
-        actions={
-          <Button
-            onClick={() => {
-              refetchLogs();
-              refetchRuns();
-            }}
-          >
-            Refresh
-          </Button>
-        }
-      >
-        Operational Logs
-      </Header>
-
-      {(logsError || runsError) && (
-        <Alert type="error" header="Log ingestion error">
-          {logsError || runsError}
-        </Alert>
-      )}
-
+    <PageLayout
+      title="Operational Logs"
+      description="Structured operational pipeline events and scrape run history"
+      breadcrumbs={[{ text: 'Logs', href: '/logs' }]}
+      actions={
+        <Button
+          onClick={() => {
+            refetchLogs();
+            refetchRuns();
+          }}
+        >
+          Refresh
+        </Button>
+      }
+      error={logsError || runsError}
+    >
       <Tabs
         activeTabId={activeTab}
         onChange={e => setActiveTab(e.detail.activeTabId)}
@@ -255,7 +247,7 @@ export default function LogsPage() {
                           </div>
                           {l.data && Object.keys(l.data).length > 0 && (
                             <ExpandableSection headerText="Context Data">
-                              <pre style={{ fontSize: 11, margin: 0, padding: 4, background: '#f4f4f4', borderRadius: 4, overflowX: 'auto' }}>
+                              <pre style={{ fontSize: 13, margin: 0, padding: '8px 12px', background: 'var(--code-bg)', color: 'var(--code-text)', border: '1px solid var(--code-border)', borderRadius: 4, overflowX: 'auto' }}>
                                 {JSON.stringify(l.data, null, 2)}
                               </pre>
                             </ExpandableSection>
@@ -406,6 +398,6 @@ export default function LogsPage() {
           },
         ]}
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

@@ -11,6 +11,7 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Badge from '@cloudscape-design/components/badge';
 import Select from '@cloudscape-design/components/select';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
+import PageLayout from '../components/PageLayout';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -106,24 +107,23 @@ export default function GeoUnresolvedPage() {
   }, [classified]);
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Offers with unresolved or ambiguous geographic location scope requiring operational attention"
-        counter={loading ? undefined : `(${unresolvedOffers.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button onClick={() => navigate('/geo-map')}>Open Geo Map</Button>
-            <Button onClick={() => navigate('/offers')}>All Offers</Button>
-          </SpaceBetween>
-        }
-      >
-        Unresolved Geographic Locations
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
-
+    <PageLayout
+      title="Unresolved Geographic Locations"
+      description="Offers with unresolved or ambiguous geographic location scope requiring operational attention"
+      counter={loading ? undefined : `(${unresolvedOffers.length})`}
+      breadcrumbs={[
+        { text: 'Geo map', href: '/geo-map' },
+        { text: 'Unresolved locations', href: '/geo-unresolved' },
+      ]}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button onClick={() => navigate('/geo-map')}>Open Geo Map</Button>
+          <Button onClick={() => navigate('/offers')}>All Offers</Button>
+        </SpaceBetween>
+      }
+      error={error}
+    >
       <Alert type="info" header="AddressEngine & Governance Rule">
         <strong>Preserve Uncertainty:</strong> Do not assign all Colombo branches when an offer says "selected Colombo outlets". AddressEngine uses a 3-tier cache (Memory → Disk <code>.geo-cache/</code> → Postgres) ensuring zero cost for cached locations.
       </Alert>
@@ -233,6 +233,6 @@ export default function GeoUnresolvedPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

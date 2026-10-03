@@ -7,9 +7,9 @@ import Table from '@cloudscape-design/components/table';
 import Select from '@cloudscape-design/components/select';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Button from '@cloudscape-design/components/button';
-import Alert from '@cloudscape-design/components/alert';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 export default function StagingPage() {
   const navigate = useNavigate();
@@ -27,22 +27,19 @@ export default function StagingPage() {
   const offers = data?.items ?? [];
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Offers awaiting review before approval/publish"
-        counter={loading ? undefined : `(${offers.length})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button onClick={() => navigate('/offers')}>All offers</Button>
-          </SpaceBetween>
-        }
-      >
-        Staging
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Staging"
+      description="Offers awaiting review before approval/publish"
+      counter={loading ? undefined : `(${offers.length})`}
+      breadcrumbs={[{ text: 'Staging', href: '/staging' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button onClick={() => navigate('/offers')}>All offers</Button>
+        </SpaceBetween>
+      }
+    >
 
       <Select
         selectedOption={bankFilter}
@@ -104,6 +101,6 @@ export default function StagingPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

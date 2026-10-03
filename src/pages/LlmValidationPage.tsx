@@ -1,16 +1,15 @@
 import Header from '@cloudscape-design/components/header';
 import Container from '@cloudscape-design/components/container';
-import SpaceBetween from '@cloudscape-design/components/space-between';
 import Box from '@cloudscape-design/components/box';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Button from '@cloudscape-design/components/button';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
 import { useNavigate } from 'react-router-dom';
 import { api, type ApiValidationReport } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 export default function LlmValidationPage() {
   const navigate = useNavigate();
@@ -29,16 +28,13 @@ export default function LlmValidationPage() {
   const invalid = reports.filter(r => r.llm_valid === false).length;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="LLM-based offer quality scoring — results from Neon Postgres"
-        actions={<Button onClick={() => navigate('/validation')}>Rule validation</Button>}
-      >
-        LLM Validation
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="LLM Validation"
+      description="LLM-based offer quality scoring — results from Neon Postgres"
+      breadcrumbs={[{ text: 'LLM validation', href: '/llm-validation' }]}
+      error={error}
+      actions={<Button onClick={() => navigate('/validation')}>Rule validation</Button>}
+    >
 
       <Container header={<Header variant="h2">Summary</Header>}>
         <ColumnLayout columns={4} variant="text-grid">
@@ -135,6 +131,6 @@ export default function LlmValidationPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

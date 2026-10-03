@@ -6,11 +6,11 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
-import BreadcrumbGroup from '@cloudscape-design/components/breadcrumb-group';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
+import PageLayout from '../components/PageLayout';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -98,38 +98,32 @@ export default function ScrapeRunDetailPage() {
   }
 
   return (
-    <SpaceBetween size="l">
-      <BreadcrumbGroup
-        items={[
-          { text: 'Scrape runs', href: '/runs' },
-          { text: run ? `${run.bank.toUpperCase()} run ${run.id.slice(0, 8)}` : (id ?? ''), href: '' },
-        ]}
-        onFollow={e => { e.preventDefault(); navigate('/runs'); }}
-      />
-
+    <PageLayout
+      title={run ? `Run ${run.id.slice(0, 8)}` : (id ? `Run ${id.slice(0, 8)}` : 'Scrape Run Details')}
+      description={run ? `${run.bank.toUpperCase()} — ${run.mode}` : undefined}
+      breadcrumbs={[
+        { text: 'Scrape runs', href: '/runs' },
+        { text: run ? `${run.bank.toUpperCase()} run ${run.id.slice(0, 8)}` : (id ?? ''), href: '' },
+      ]}
+      actions={
+        run ? (
+          <SpaceBetween direction="horizontal" size="xs">
+            <Button onClick={() => navigate('/runs')}>All runs</Button>
+            <Button onClick={() => navigate(`/offers?bank=${run.bank}`)}>
+              View {run.bank.toUpperCase()} offers
+            </Button>
+            <Button variant="primary" loading={revalidating} onClick={runRevalidate}>
+              Run re-validation
+            </Button>
+          </SpaceBetween>
+        ) : undefined
+      }
+      error={error}
+    >
       {loading && <Spinner size="large" />}
-      {error && <Alert type="error" header="API error">{error}</Alert>}
 
       {run && (
         <>
-          <Header
-            variant="h1"
-            description={`${run.bank.toUpperCase()} — ${run.mode}`}
-            actions={
-              <SpaceBetween direction="horizontal" size="xs">
-                <Button onClick={() => navigate('/runs')}>All runs</Button>
-                <Button onClick={() => navigate(`/offers?bank=${run.bank}`)}>
-                  View {run.bank.toUpperCase()} offers
-                </Button>
-                <Button variant="primary" loading={revalidating} onClick={runRevalidate}>
-                  Run re-validation
-                </Button>
-              </SpaceBetween>
-            }
-          >
-            Run {run.id.slice(0, 8)}
-          </Header>
-
           {/* DB state explanation */}
           {dbStatusSummary()}
 
@@ -255,6 +249,6 @@ export default function ScrapeRunDetailPage() {
           />
         </>
       )}
-    </SpaceBetween>
+    </PageLayout>
   );
 }

@@ -244,7 +244,27 @@ export interface ApiBankParserTestResult {
   total: number;
   matched: number;
   unmatched: number;
-  results: Array<{ unique_id: string; title: string; extracted: string | null; matched: boolean; trace?: unknown }>;
+  results: Array<{
+    unique_id: string;
+    title: string;
+    input?: string | null;
+    extracted: string | null;
+    matched: boolean;
+    trace?: unknown;
+  }>;
+}
+
+export interface ApiRuleCompileTestResult {
+  valid: boolean;
+  compiled?: {
+    signature: string;
+    rule_type: string;
+    field?: string;
+  };
+  input?: string;
+  matched: boolean;
+  output: string | null;
+  error?: string;
 }
 
 export interface ApiRegressionCandidate {
@@ -662,6 +682,15 @@ export const api = {
 
   testBankParserRule: (id: string, limit?: number, trace?: boolean) =>
     post<ApiBankParserTestResult>(`/bank-parser-rules/${id}/test?limit=${limit ?? 20}${trace ? '&trace=true' : ''}`),
+
+  compileTestBankParserRule: (body: {
+    rule: Partial<ApiBankParserRule>;
+    input?: string;
+    rawOffer?: Record<string, unknown>;
+  }) => post<ApiRuleCompileTestResult>('/bank-parser-rules/compile-test', body),
+
+  sampleOffer: (bank: string) =>
+    get<{ sample: { unique_id: string; bank: string; title: string; raw_offer: Record<string, unknown> } | null }>(`/bank-parser-rules/sample-offer?bank=${bank}`),
 
   bankParserBacktest: (bank: string, limit?: number) =>
     post<ApiParserBacktestResult>('/bank-parser-rules/backtest', { bank, limit: limit ?? 30 }),

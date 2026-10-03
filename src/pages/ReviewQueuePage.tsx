@@ -8,10 +8,10 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Button from '@cloudscape-design/components/button';
 import Box from '@cloudscape-design/components/box';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Select from '@cloudscape-design/components/select';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 const PAGE_SIZE = 15;
 
@@ -69,22 +69,19 @@ export default function ReviewQueuePage() {
   const total = filtered.length;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Offers awaiting review, correction, or approval — from Neon Postgres"
-        counter={loading ? undefined : `(${total})`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button variant="primary" onClick={() => navigate('/offers')}>All offers</Button>
-          </SpaceBetween>
-        }
-      >
-        Review queue
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Review queue"
+      description="Offers awaiting review, correction, or approval — from Neon Postgres"
+      counter={loading ? undefined : `(${total})`}
+      breadcrumbs={[{ text: 'Review queue', href: '/review-queue' }]}
+      error={error}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button variant="primary" onClick={() => navigate('/offers')}>All offers</Button>
+        </SpaceBetween>
+      }
+    >
 
       <SpaceBetween direction="horizontal" size="s">
         <TextFilter
@@ -152,6 +149,6 @@ export default function ReviewQueuePage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

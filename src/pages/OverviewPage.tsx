@@ -7,12 +7,12 @@ import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
-import Alert from '@cloudscape-design/components/alert';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
 import Badge from '@cloudscape-design/components/badge';
 import { api, type ApiScrapeRun, type ApiBankSummary, type ApiGeoStats } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 function Metric({ label, value, loading }: { label: string; value: string | number; loading: boolean }) {
   return (
@@ -35,26 +35,17 @@ export default function OverviewPage() {
   const v = stats?.validation;
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Lanka Offers data pipeline — live from Neon Postgres"
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button variant="primary" onClick={() => navigate('/run-scraper')}>Run scraper</Button>
-          </SpaceBetween>
-        }
-      >
-        Overview
-      </Header>
-
-      {error && (
-        <Alert type="error" header="API unavailable">
-          Cannot reach the Lanka Offers API at localhost:3001. Start it with <code>npm run api</code> in the LankaOffers directory.
-          <br />{error}
-        </Alert>
-      )}
+    <PageLayout
+      title="Overview"
+      description="Lanka Offers data pipeline — live from Neon Postgres"
+      error={error ? `Cannot reach the API at localhost:3001. Start it with \`npm run api\`. ${error}` : null}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button variant="primary" onClick={() => navigate('/run-scraper')}>Run scraper</Button>
+        </SpaceBetween>
+      }
+    >
 
       <Container header={<Header variant="h2">Operations metrics</Header>}>
         <ColumnLayout columns={4} variant="text-grid">
@@ -334,6 +325,6 @@ export default function OverviewPage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

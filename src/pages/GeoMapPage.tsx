@@ -8,13 +8,13 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import Select from '@cloudscape-design/components/select';
 import Button from '@cloudscape-design/components/button';
 import Table from '@cloudscape-design/components/table';
-import Alert from '@cloudscape-design/components/alert';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Spinner from '@cloudscape-design/components/spinner';
 import Tabs from '@cloudscape-design/components/tabs';
 import { api, type ApiOffer } from '../services/api';
 import { useApi } from '../services/use-api';
 import LKMap, { type MapMarker } from '../components/LKMap';
+import PageLayout from '../components/PageLayout';
 
 const BANKS = ['hnb', 'boc', 'sampath', 'ndb', 'dfcc', 'seylan', 'peoples', 'pabc', 'nsb', 'combank'];
 
@@ -142,23 +142,19 @@ export default function GeoMapPage() {
   }, [offers]);
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Geographic distribution of bank offers — OpenStreetMap"
-        counter={loading ? undefined : `(${markers.length} mapped locations)`}
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button onClick={refetch}>Refresh</Button>
-            <Button onClick={() => navigate('/geo-unresolved')}>Unresolved</Button>
-          </SpaceBetween>
-        }
-      >
-        Geo map
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
-
+    <PageLayout
+      title="Geo Map"
+      description="Geographic distribution of bank offers — OpenStreetMap"
+      counter={loading ? undefined : `(${markers.length} mapped locations)`}
+      breadcrumbs={[{ text: 'Geo map', href: '/geo-map' }]}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={refetch}>Refresh</Button>
+          <Button onClick={() => navigate('/geo-unresolved')}>Unresolved</Button>
+        </SpaceBetween>
+      }
+      error={error}
+    >
       <Select
         selectedOption={bankFilter}
         onChange={e => setBankFilter(e.detail.selectedOption)}
@@ -257,6 +253,6 @@ export default function GeoMapPage() {
           },
         ]}
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

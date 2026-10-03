@@ -32,13 +32,13 @@ export default function PipelineStepper({ stages }: Props) {
       {stages.map((s, idx) => (
         <div key={s.name} className="pipeline-step">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#565959' }}>{idx + 1}.</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>{idx + 1}.</span>
             {getStatusIndicator(s.status)}
           </div>
           <div className="pipeline-step-name" style={{ fontWeight: 600 }}>{s.name}</div>
           {s.duration && <div className="pipeline-step-meta">{s.duration}</div>}
           {s.itemCount !== undefined && <div className="pipeline-step-meta">{s.itemCount} items</div>}
-          {!!s.errorCount && <div className="pipeline-step-meta" style={{ color: '#CC0C39', fontWeight: 600 }}>{s.errorCount} errors</div>}
+          {!!s.errorCount && <div className="pipeline-step-meta" style={{ color: 'var(--status-error)', fontWeight: 600 }}>{s.errorCount} errors</div>}
         </div>
       ))}
     </div>

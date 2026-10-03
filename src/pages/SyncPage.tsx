@@ -11,6 +11,7 @@ import Table from '@cloudscape-design/components/table';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import { api, type ApiBulkSyncSummary } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 export default function SyncPage() {
   const { data: preview, loading, error, refetch } = useApi(() => api.syncPreview(), []);
@@ -35,16 +36,13 @@ export default function SyncPage() {
   }
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Preview and run the DB sync/publish step — only APPROVED offers are ever synced"
-        actions={<Button onClick={() => { refetch(); refetchRuns(); }}>Refresh</Button>}
-      >
-        Sync
-      </Header>
-
-      {error && <Alert type="error" header="API error">{error}</Alert>}
+    <PageLayout
+      title="Sync"
+      description="Preview and run the DB sync/publish step — only APPROVED offers are ever synced"
+      breadcrumbs={[{ text: 'Sync', href: '/sync' }]}
+      error={error}
+      actions={<Button onClick={() => { refetch(); refetchRuns(); }}>Refresh</Button>}
+    >
       {syncError && <Alert type="error" header="Sync failed" dismissible onDismiss={() => setSyncError(null)}>{syncError}</Alert>}
 
       <Container header={<Header variant="h2">Sync preview (read-only)</Header>}>
@@ -90,6 +88,6 @@ export default function SyncPage() {
         variant="embedded"
         empty={<Box textAlign="center" color="inherit">No sync runs yet.</Box>}
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

@@ -17,6 +17,7 @@ import ColumnLayout from '@cloudscape-design/components/column-layout';
 import ExpandableSection from '@cloudscape-design/components/expandable-section';
 import { api, type ApiScrapeRun } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 const BANKS = ['hnb', 'boc', 'sampath', 'ndb', 'dfcc', 'seylan', 'peoples', 'pabc', 'nsb', 'combank'];
 
@@ -104,14 +105,12 @@ export default function RunScraperPage() {
   }
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Trigger a scrape run and persist results to Neon Postgres"
-        actions={<Button onClick={() => navigate('/runs')}>View all runs</Button>}
-      >
-        Run scraper
-      </Header>
+    <PageLayout
+      title="Run scraper"
+      description="Trigger a scrape run and persist results to Neon Postgres"
+      breadcrumbs={[{ text: 'Scrape runs', href: '/runs' }, { text: 'Run scraper', href: '/run-scraper' }]}
+      actions={<Button onClick={() => navigate('/runs')}>View all runs</Button>}
+    >
 
       {apiDown && (
         <Alert type="error" header="API server not running">
@@ -337,6 +336,6 @@ export default function RunScraperPage() {
           />
         )}
       </Container>
-    </SpaceBetween>
+    </PageLayout>
   );
 }

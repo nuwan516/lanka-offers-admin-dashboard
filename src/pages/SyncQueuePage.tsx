@@ -14,6 +14,7 @@ import Badge from '@cloudscape-design/components/badge';
 import Select from '@cloudscape-design/components/select';
 import { api, type ApiOffer, type ApiBulkSyncSummary } from '../services/api';
 import { useApi } from '../services/use-api';
+import PageLayout from '../components/PageLayout';
 
 const BANK_OPTIONS = [
   { label: 'All banks', value: '' },
@@ -95,36 +96,26 @@ export default function SyncQueuePage() {
   }
 
   return (
-    <SpaceBetween size="l">
-      <Header
-        variant="h1"
-        description="Approved offers and staged candidates awaiting production database publish / synchronization"
-        actions={
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button
-              onClick={() => {
-                refetchOffers();
-                refetchPreview();
-              }}
-            >
-              Refresh
-            </Button>
-            <Button onClick={() => navigate('/sync')}>Sync Preview & History</Button>
-            <Button
-              variant="primary"
-              onClick={syncAllApproved}
-              loading={bulkBusy}
-              disabled={items.length === 0}
-            >
-              Sync All Approved ({items.length})
-            </Button>
-          </SpaceBetween>
-        }
-      >
-        Database Sync Queue
-      </Header>
-
-      {offersError && <Alert type="error" header="API error">{offersError}</Alert>}
+    <PageLayout
+      title="Database Sync Queue"
+      description="Approved offers and staged candidates awaiting production database publish / synchronization"
+      breadcrumbs={[{ text: 'Sync queue', href: '/sync-queue' }]}
+      error={offersError}
+      actions={
+        <SpaceBetween direction="horizontal" size="xs">
+          <Button onClick={() => { refetchOffers(); refetchPreview(); }}>Refresh</Button>
+          <Button onClick={() => navigate('/sync')}>Sync Preview &amp; History</Button>
+          <Button
+            variant="primary"
+            onClick={syncAllApproved}
+            loading={bulkBusy}
+            disabled={items.length === 0}
+          >
+            Sync All Approved ({items.length})
+          </Button>
+        </SpaceBetween>
+      }
+    >
       {actionError && (
         <Alert type="error" header="Sync error" dismissible onDismiss={() => setActionError(null)}>
           {actionError}
@@ -251,6 +242,6 @@ export default function SyncQueuePage() {
         variant="full-page"
         stickyHeader
       />
-    </SpaceBetween>
+    </PageLayout>
   );
 }

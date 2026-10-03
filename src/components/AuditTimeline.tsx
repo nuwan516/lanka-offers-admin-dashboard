@@ -3,7 +3,7 @@ import type { AuditEvent } from '../types';
 interface Props { events: AuditEvent[]; }
 
 export default function AuditTimeline({ events }: Props) {
-  if (!events.length) return <p style={{ color: '#878787', fontSize: 13 }}>No audit events recorded.</p>;
+  if (!events.length) return <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>No audit events recorded.</p>;
   return (
     <div className="audit-timeline">
       {events.map(ev => (
@@ -17,7 +17,7 @@ export default function AuditTimeline({ events }: Props) {
                 <div key={field}>
                   <strong>{field}:</strong>{' '}
                   <span className="diff-old">{from}</span>
-                  <span style={{ color: '#565959', margin: '0 6px' }}>to</span>
+                  <span style={{ color: 'var(--text-secondary)', margin: '0 6px' }}>to</span>
                   <span className="diff-new">{to}</span>
                 </div>
               ))}
