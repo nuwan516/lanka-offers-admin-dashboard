@@ -129,7 +129,7 @@ export default function GeoMapPage() {
 
   const { data: geoStats, loading: geoStatsLoading } = useApi(() => api.geoStats(), []);
 
-  const offers = data?.items ?? [];
+  const offers = useMemo(() => data?.items ?? [], [data?.items]);
   const markers = useMemo(() => extractGeoMarkers(offers), [offers]);
   const unresolved = offers.filter(o => !o.geo_locations?.length && (!o.merchant_location || !cityFromText(o.merchant_location)));
 

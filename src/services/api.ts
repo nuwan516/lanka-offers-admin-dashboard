@@ -79,6 +79,7 @@ export interface ApiOffer {
   has_pending_candidate?: boolean;
   pending_lifecycle_status?: string | null;
   geo_status?: string | null;
+  location_scope?: string | null;
   created_at: string;
   updated_at: string;
   scrape_run_id: string | null;

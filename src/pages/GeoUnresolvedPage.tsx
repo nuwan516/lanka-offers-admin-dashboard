@@ -15,15 +15,23 @@ import PageLayout from '../components/PageLayout';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 
-function classifyLocation(rawLoc?: string | null, title?: string): {
+function classifyLocation(rawLoc?: string | null, title?: string, merchant?: string | null): {
   type: 'ONLINE_ONLY' | 'NATIONWIDE' | 'AMBIGUOUS' | 'UNRESOLVED_SPECIFIC';
   badgeColor: 'blue' | 'green' | 'red' | 'grey';
   label: string;
   notes: string;
 } {
-  const text = `${rawLoc ?? ''} ${title ?? ''}`.toLowerCase();
+  const text = `${rawLoc ?? ''} ${title ?? ''} ${merchant ?? ''}`.toLowerCase();
 
-  if (text.includes('online') || text.includes('daraz') || text.includes('app') || text.includes('website') || text.includes('uber eats') || text.includes('pickme')) {
+  // Physical clues must never be overridden by casual website/app mentions
+  const hasPhysicalClue =
+    /\b(?:hotel|resort|villa|restaurant|café|cafe|hospital|showroom|kandy|colombo|galle|mirissa|dambulla|negombo|jaffna|udawalawa)\b/i.test(text);
+
+  const isExplicitOnline =
+    /\b(?:online\s+only|valid\s+(?:only\s+)?online|website\s+only|daraz|uber\s*eats|pickme|promo\s*code)\b/i.test(text) ||
+    (/\b(?:mobile\s+app|online)\b/i.test(text) && !hasPhysicalClue);
+
+  if (isExplicitOnline && !hasPhysicalClue) {
     return {
       type: 'ONLINE_ONLY',
       badgeColor: 'blue',
@@ -72,7 +80,7 @@ export default function GeoUnresolvedPage() {
 
   const { data, loading, error, refetch } = useApi(() => api.offers({ limit: 300 }), []);
 
-  const offers = data?.items ?? [];
+  const offers = useMemo(() => data?.items ?? [], [data?.items]);
 
   // Filter offers where geo is not resolved
   const unresolvedOffers = useMemo(() => {
@@ -83,7 +91,7 @@ export default function GeoUnresolvedPage() {
   const classified = useMemo(() => {
     return unresolvedOffers.map(o => ({
       offer: o,
-      classification: classifyLocation(o.merchant_location, o.title),
+      classification: classifyLocation(o.merchant_location, o.title, o.merchant_name),
     }));
   }, [unresolvedOffers]);
 
