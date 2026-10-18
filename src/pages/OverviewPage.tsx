@@ -38,7 +38,7 @@ export default function OverviewPage() {
     <PageLayout
       title="Overview"
       description="Lanka Offers data pipeline — live from Neon Postgres"
-      error={error ? `Cannot reach the API at localhost:3001. Start it with \`npm run api\`. ${error}` : null}
+      error={error ? `Cannot reach the API at localhost:3002. Start it with \`npm run api\` in admin/api. ${error}` : null}
       actions={
         <SpaceBetween direction="horizontal" size="xs">
           <Button onClick={refetch}>Refresh</Button>

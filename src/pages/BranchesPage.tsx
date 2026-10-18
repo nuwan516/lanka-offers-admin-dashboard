@@ -14,7 +14,6 @@ import FormField from '@cloudscape-design/components/form-field';
 import Badge from '@cloudscape-design/components/badge';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
-import { mockBranches } from '../mock-data';
 import type { Branch } from '../types';
 import PageLayout from '../components/PageLayout';
 
@@ -57,8 +56,7 @@ export default function BranchesPage() {
       }
     }
 
-    if (liveBranches.length > 0) return liveBranches;
-    return mockBranches;
+    return liveBranches;
   }, [offersData]);
 
   // District options

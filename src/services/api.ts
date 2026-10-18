@@ -16,7 +16,7 @@ async function get<T>(path: string, params?: Record<string, string | number | un
   const res = await fetch(url.toString());
   const ct = res.headers.get('content-type') ?? '';
   if (!ct.includes('application/json')) {
-    throw new Error('API server is not running. Start it with: npm run api (in the LankaOffers directory)');
+    throw new Error('Admin API server is not running on port 3002. Start it with: npm run api in admin/api');
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
@@ -33,7 +33,7 @@ async function post<T>(path: string, body?: unknown): Promise<T> {
   });
   const ct = res.headers.get('content-type') ?? '';
   if (!ct.includes('application/json')) {
-    throw new Error('API server is not running. Start it with: npm run api (in the LankaOffers directory)');
+    throw new Error('Admin API server is not running on port 3002. Start it with: npm run api in admin/api');
   }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? res.statusText);
@@ -48,7 +48,7 @@ async function patch<T>(path: string, body: unknown): Promise<T> {
   });
   const ct = res.headers.get('content-type') ?? '';
   if (!ct.includes('application/json')) {
-    throw new Error('API server is not running. Start it with: npm run api (in the LankaOffers directory)');
+    throw new Error('Admin API server is not running on port 3002. Start it with: npm run api in admin/api');
   }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? res.statusText);
@@ -744,7 +744,43 @@ export const api = {
 
   geoBackfill: (bank?: string) =>
     post<{ message: string; processed: number; updated: number }>('/geo/backfill', bank ? { bank } : {}),
+
+  getScheduleStatus: () =>
+    get<ApiSchedulerStatus>('/schedule'),
+
+  toggleGlobalSchedule: (enabled: boolean, operator?: string) =>
+    post<{ enabled: boolean; message: string }>('/schedule/toggle-global', { enabled, operator }),
+
+  toggleSchedule: (id: string, enabled: boolean, operator?: string) =>
+    post<ApiScheduleEntry>(`/schedule/${id}/toggle`, { enabled, operator }),
+
+  runScheduleNow: (id: string, operator?: string) =>
+    post<{ message: string; jobId: string; pid: number; bank: string }>(`/schedule/${id}/run-now`, { operator }),
 };
+
+export interface ApiScheduleEntry {
+  id: string;
+  name: string;
+  bank: string;
+  cron: string;
+  description: string;
+  enabled: boolean;
+  timeoutMs: number;
+  lastRun: string | null;
+  nextRun: string | null;
+  lastStatus: 'idle' | 'running' | 'success' | 'failed';
+  retryCount: number;
+  maxRetries: number;
+  backoffMinutes: number;
+}
+
+export interface ApiSchedulerStatus {
+  enabled: boolean;
+  activeScrapes: number;
+  totalSchedules: number;
+  activeSchedules: number;
+  schedules: ApiScheduleEntry[];
+}
 
 
 // Named to avoid collision with the `patch` helper above

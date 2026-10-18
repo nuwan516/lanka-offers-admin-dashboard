@@ -58,7 +58,7 @@ const NAV_ITEMS: SideNavigationProps.Item[] = [
       { type: 'link', text: 'Jobs', href: '/jobs' },
       { type: 'link', text: 'Logs', href: '/logs' },
       { type: 'link', text: 'Errors', href: '/errors' },
-      { type: 'link', text: 'Cost control', href: '/cost-control' },
+      { type: 'link', text: 'Cost & budget tracker', href: '/cost-control' },
       { type: 'link', text: 'Settings', href: '/settings' },
     ],
   },
