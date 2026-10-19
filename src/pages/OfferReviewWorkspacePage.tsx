@@ -15,6 +15,7 @@ import FormField from '@cloudscape-design/components/form-field';
 import Table from '@cloudscape-design/components/table';
 import Badge from '@cloudscape-design/components/badge';
 import PageLayout from '../components/PageLayout';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 
@@ -160,6 +161,7 @@ export default function OfferReviewWorkspacePage() {
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<null | 'approve' | 'reject' | 'sendback' | 'disable' | 'publish'>(null);
 
   useEffect(() => { setDraft({}); }, [id]);
 
@@ -247,6 +249,16 @@ export default function OfferReviewWorkspacePage() {
     await runAction('publish', () => api.syncOffer(id));
   }
 
+  async function runConfirmed() {
+    const which = confirm;
+    setConfirm(null);
+    if (which === 'approve') await approve(Object.keys(draft).length > 0);
+    else if (which === 'reject') await reject();
+    else if (which === 'sendback') await sendBack();
+    else if (which === 'disable') await disable();
+    else if (which === 'publish') await publishSync();
+  }
+
   async function revalidateRules() {
     if (!id) return;
     await runAction('revalidate', () => api.revalidate({ offerId: id }));
@@ -316,25 +328,25 @@ export default function OfferReviewWorkspacePage() {
       <Container>
         <SpaceBetween direction="horizontal" size="xs">
           <Button onClick={saveDraft} loading={busy === 'save'} disabled={Object.keys(draft).length === 0}>Save draft</Button>
-          <Button variant="primary" onClick={() => approve(Object.keys(draft).length > 0)} loading={busy === 'approve'}
+          <Button variant="primary" onClick={() => setConfirm('approve')} loading={busy === 'approve'}
             disabled={!['DISCOVERED', 'VALIDATED', 'REVIEW_REQUIRED'].includes(reviewStatus)}>
             {Object.keys(draft).length > 0 ? 'Approve with corrections' : 'Approve'}
           </Button>
-          <Button onClick={reject} loading={busy === 'reject'}
+          <Button onClick={() => setConfirm('reject')} loading={busy === 'reject'}
             disabled={!['DISCOVERED', 'VALIDATED', 'REVIEW_REQUIRED', 'APPROVED'].includes(reviewStatus)}>
             Reject
           </Button>
-          <Button onClick={sendBack} loading={busy === 'sendback'} disabled={!['APPROVED', 'REJECTED'].includes(reviewStatus)}>
+          <Button onClick={() => setConfirm('sendback')} loading={busy === 'sendback'} disabled={!['APPROVED', 'REJECTED'].includes(reviewStatus)}>
             Send back to review
           </Button>
-          <Button onClick={publishSync} loading={busy === 'publish'}
+          <Button onClick={() => setConfirm('publish')} loading={busy === 'publish'}
             disabled={hasPending ? reviewStatus !== 'APPROVED' : status !== 'APPROVED'}>
             Publish / Sync
           </Button>
           <Button onClick={revalidateRules} loading={busy === 'revalidate'}>
             Revalidate rules
           </Button>
-          <Button onClick={disable} loading={busy === 'disable'}>Disable</Button>
+          <Button onClick={() => setConfirm('disable')} loading={busy === 'disable'}>Disable</Button>
         </SpaceBetween>
       </Container>
 
@@ -417,8 +429,25 @@ export default function OfferReviewWorkspacePage() {
         <Container header={<Header variant="h2" description="Deterministic same-bank matches — review before this offer can publish">Possible duplicates</Header>}>
           <Table
             columnDefinitions={[
+              {
+                id: 'candidate',
+                header: 'Possible match',
+                cell: d => (
+                  <SpaceBetween size="xxs">
+                    <Button variant="inline-link" onClick={() => navigate(`/offers/${d.candidate_offer_id}/review`)}>
+                      {d.candidate_title ?? d.candidate_offer_id}
+                    </Button>
+                    {d.candidate_merchant && <Box fontSize="body-s" color="text-body-secondary">{d.candidate_merchant}</Box>}
+                  </SpaceBetween>
+                ),
+              },
               { id: 'classification', header: 'Type', cell: d => d.classification },
               { id: 'score', header: 'Score', cell: d => `${d.score}/100` },
+              {
+                id: 'reasons',
+                header: 'Why it matched',
+                cell: d => (d.reasons?.length ? d.reasons.join('; ') : '—'),
+              },
               { id: 'status', header: 'Review status', cell: d => d.status },
             ]}
             items={data.duplicates}
@@ -554,6 +583,71 @@ export default function OfferReviewWorkspacePage() {
           />
         </Container>
       </Grid>
+      <ConfirmDialog
+        visible={confirm === 'approve'}
+        title={Object.keys(draft).length > 0 ? 'Approve with corrections?' : 'Approve this offer?'}
+        summary={`Approve "${String(offer.title)}".`}
+        consequences={[
+          'The offer becomes APPROVED. It is not visible to consumers until you run Publish / Sync.',
+          ...(Object.keys(draft).length > 0
+            ? [`${Object.keys(draft).length} manual correction(s) are saved as a manual override and kept on future scrapes.`]
+            : []),
+          ...(hasPending
+            ? ['This offer is already published: approving stages the new candidate to replace the live version at the next Publish / Sync.']
+            : []),
+        ]}
+        confirmLabel={Object.keys(draft).length > 0 ? 'Approve with corrections' : 'Approve'}
+        onConfirm={runConfirmed}
+        onDismiss={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        visible={confirm === 'reject'}
+        title="Reject this offer?"
+        summary={`Reject "${String(offer.title)}".`}
+        consequences={[
+          'The offer will not be published.',
+          'You can send it back to review later.',
+        ]}
+        confirmLabel="Reject"
+        tone="danger"
+        onConfirm={runConfirmed}
+        onDismiss={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        visible={confirm === 'sendback'}
+        title="Send back to review?"
+        summary={`Return "${String(offer.title)}" to the review queue.`}
+        consequences={['Its current approval or rejection is cleared and it needs a new decision.']}
+        confirmLabel="Send back"
+        onConfirm={runConfirmed}
+        onDismiss={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        visible={confirm === 'disable'}
+        title="Disable this offer?"
+        summary={`Disable "${String(offer.title)}".`}
+        consequences={[
+          'Disabled offers are not served to consumers.',
+          'The offer record and its original evidence are kept.',
+        ]}
+        confirmLabel="Disable offer"
+        tone="danger"
+        onConfirm={runConfirmed}
+        onDismiss={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        visible={confirm === 'publish'}
+        title="Publish this offer to consumers?"
+        summary={`Publish / sync "${String(offer.title)}".`}
+        consequences={[
+          'The public API serves PUBLISHED offers, so this offer becomes visible in the web and mobile apps.',
+          ...(hasPending ? ['The live version is replaced by the approved candidate.'] : []),
+        ]}
+        acknowledgement="I have reviewed the offer and want it visible to consumers."
+        confirmLabel="Publish"
+        onConfirm={runConfirmed}
+        onDismiss={() => setConfirm(null)}
+      />
     </PageLayout>
   );
 }

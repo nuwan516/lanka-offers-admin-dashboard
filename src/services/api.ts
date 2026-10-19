@@ -173,6 +173,14 @@ export interface ApiBankSummary {
   last_run_new?: number;
   last_run_changed?: number;
   last_run_errors?: number;
+  // Returned by GET /api/banks; counts arrive as strings from Postgres.
+  published_count?: string | number;
+  review_required_count?: string | number;
+  validated_count?: string | number;
+  last_attempted_at?: string | null;
+  last_success_at?: string | null;
+  last_published_at?: string | null;
+  last_duration_sec?: number | null;
   health_status?: 'Healthy' | 'Warning' | 'Failed' | 'Running' | 'Idle';
 }
 
@@ -631,8 +639,8 @@ export const api = {
     return post<{ total: number; passed: number; failed: number; errors: number }>('/revalidate', p);
   },
 
-  triggerScrape: (bank: string, options?: { cache?: boolean; llm?: boolean; noValidate?: boolean; skipDetails?: boolean; concurrency?: number; maxCategories?: number }) =>
-    post<{ message: string; pid: number; bank: string; startedAt: string }>(`/scrape/${bank}`, options),
+  triggerScrape: (bank: string, options?: { cache?: boolean; llm?: boolean; noValidate?: boolean; skipDetails?: boolean; concurrency?: number; maxCategories?: number; dryRun?: boolean }) =>
+    post<{ message: string; pid: number; bank: string; startedAt: string; dryRun?: boolean }>(`/scrape/${bank}`, options),
 
   cancelScrape: (bank: string) =>
     post<{ message: string; cancelled: boolean; pid: number; bank: string }>(`/scrape/${bank}/cancel`),
@@ -644,7 +652,7 @@ export const api = {
     get<{ items: ApiLogEntry[]; total: number }>('/logs', params),
 
   scrapeStatus: () =>
-    get<{ active: Array<{ pid: number; bank: string; startedAt: string }>; activeGeo: Array<{ pid: number; bank: string; startedAt: string }> }>('/scrape/status'),
+    get<{ active: Array<{ pid: number; bank: string; startedAt: string; dryRun?: boolean }>; activeGeo: Array<{ pid: number; bank: string; startedAt: string }> }>('/scrape/status'),
 
   triggerGeocode: (bank: string) =>
     post<{ message: string; pid: number; bank: string; startedAt: string }>(`/geocode/${bank}`),

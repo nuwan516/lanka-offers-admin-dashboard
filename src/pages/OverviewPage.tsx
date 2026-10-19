@@ -6,6 +6,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
+import Alert from '@cloudscape-design/components/alert';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Spinner from '@cloudscape-design/components/spinner';
 import Table from '@cloudscape-design/components/table';
@@ -13,6 +14,19 @@ import Badge from '@cloudscape-design/components/badge';
 import { api, type ApiScrapeRun, type ApiBankSummary, type ApiGeoStats } from '../services/api';
 import { useApi } from '../services/use-api';
 import PageLayout from '../components/PageLayout';
+
+/** Postgres counts arrive as strings; null means "not reported", never 0. */
+function count(v: string | number | null | undefined): number | null {
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function fmtWhen(iso: string | null | undefined, fallback = '—'): string {
+  if (!iso) return fallback;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? fallback : d.toLocaleString();
+}
 
 function Metric({ label, value, loading }: { label: string; value: string | number; loading: boolean }) {
   return (
@@ -26,7 +40,7 @@ function Metric({ label, value, loading }: { label: string; value: string | numb
 export default function OverviewPage() {
   const navigate = useNavigate();
   const { data: stats, loading, error, refetch } = useApi(() => api.stats(), []);
-  const { data: banks, loading: banksLoading } = useApi(() => api.banks(), []);
+  const { data: banks, loading: banksLoading, error: banksError, refetch: refetchBanks } = useApi(() => api.banks(), []);
   const { data: runs, loading: runsLoading } = useApi(() => api.runs({ limit: 5 }), []);
   const { data: geoStats, loading: geoStatsLoading } = useApi<ApiGeoStats>(() => api.geoStats(), []);
 
@@ -54,8 +68,8 @@ export default function OverviewPage() {
             <Box variant="awsui-key-label">Pending review / staging</Box>
             {loading ? <Spinner size="normal" /> : (
               <SpaceBetween direction="horizontal" size="xs" alignItems="center">
-                <Box variant="awsui-value-large">{o?.pending_review ?? '0'}</Box>
-                {parseInt(o?.pending_review ?? '0') > 0 && <Badge color="blue">Review</Badge>}
+                <Box variant="awsui-value-large">{o?.pending_review ?? '—'}</Box>
+                {parseInt(o?.pending_review ?? '—') > 0 && <Badge color="blue">Review</Badge>}
               </SpaceBetween>
             )}
           </div>
@@ -63,8 +77,8 @@ export default function OverviewPage() {
             <Box variant="awsui-key-label">Pending DB sync (approved)</Box>
             {loading ? <Spinner size="normal" /> : (
               <SpaceBetween direction="horizontal" size="xs" alignItems="center">
-                <Box variant="awsui-value-large">{o?.pending_sync ?? '0'}</Box>
-                {parseInt(o?.pending_sync ?? '0') > 0 && <Badge color="green">Sync</Badge>}
+                <Box variant="awsui-value-large">{o?.pending_sync ?? '—'}</Box>
+                {parseInt(o?.pending_sync ?? '—') > 0 && <Badge color="green">Sync</Badge>}
               </SpaceBetween>
             )}
           </div>
@@ -72,17 +86,17 @@ export default function OverviewPage() {
             <Box variant="awsui-key-label">Unresolved geo records</Box>
             {loading ? <Spinner size="normal" /> : (
               <SpaceBetween direction="horizontal" size="xs" alignItems="center">
-                <Box variant="awsui-value-large">{o?.unresolved_geo ?? '0'}</Box>
-                {parseInt(o?.unresolved_geo ?? '0') > 0 && <Badge color="red">Action</Badge>}
+                <Box variant="awsui-value-large">{o?.unresolved_geo ?? '—'}</Box>
+                {parseInt(o?.unresolved_geo ?? '—') > 0 && <Badge color="red">Action</Badge>}
               </SpaceBetween>
             )}
           </div>
         </ColumnLayout>
         <Box margin={{ top: 'm' }}>
           <ColumnLayout columns={4} variant="text-grid">
-            <Metric label="Offers scraped (24h)" value={r?.scraped_today ?? '0'} loading={loading} />
-            <Metric label="New offers today" value={r?.new_today ?? '0'} loading={loading} />
-            <Metric label="Changed offers today" value={r?.changed_today ?? '0'} loading={loading} />
+            <Metric label="Offers scraped (24h)" value={r?.scraped_today ?? '—'} loading={loading} />
+            <Metric label="New offers today" value={r?.new_today ?? '—'} loading={loading} />
+            <Metric label="Changed offers today" value={r?.changed_today ?? '—'} loading={loading} />
             <Metric label="Avg LLM score" value={o?.avg_llm_score ? `${o.avg_llm_score}/100` : '—'} loading={loading} />
           </ColumnLayout>
         </Box>
@@ -98,30 +112,30 @@ export default function OverviewPage() {
             <div>
               <Box variant="awsui-key-label">Running jobs</Box>
               {loading ? <Spinner size="normal" /> : (
-                <StatusIndicator type={parseInt(r?.running_jobs ?? '0') > 0 ? 'in-progress' : 'success'}>
-                  {r?.running_jobs ?? '0'} active
+                <StatusIndicator type={!r ? 'pending' : parseInt(r.running_jobs) > 0 ? 'in-progress' : 'success'}>
+                  {r ? `${r.running_jobs} active` : 'Unavailable'}
                 </StatusIndicator>
               )}
             </div>
             <div>
               <Box variant="awsui-key-label">Failed runs today</Box>
               {loading ? <Spinner size="normal" /> : (
-                <StatusIndicator type={parseInt(r?.failed_today ?? '0') > 0 ? 'error' : 'success'}>
-                  {r?.failed_today ?? '0'} failures
+                <StatusIndicator type={!r ? 'pending' : parseInt(r.failed_today) > 0 ? 'error' : 'success'}>
+                  {r ? `${r.failed_today} failures` : 'Unavailable'}
                 </StatusIndicator>
               )}
             </div>
             <div>
               <Box variant="awsui-key-label">Validation rule failures</Box>
               {loading ? <Spinner size="normal" /> : (
-                <StatusIndicator type={parseInt(v?.validation_failures ?? '0') > 0 ? 'warning' : 'success'}>
-                  {v?.validation_failures ?? '0'} issues
+                <StatusIndicator type={!v ? 'pending' : parseInt(v.validation_failures) > 0 ? 'warning' : 'success'}>
+                  {v ? `${v.validation_failures} issues` : 'Unavailable'}
                 </StatusIndicator>
               )}
             </div>
             <div>
               <Box variant="awsui-key-label">LLM validated count</Box>
-              {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{o?.llm_scored ?? '0'}</Box>}
+              {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{o?.llm_scored ?? '—'}</Box>}
             </div>
           </ColumnLayout>
         </Container>
@@ -156,18 +170,18 @@ export default function OverviewPage() {
             <div>
               <Box variant="awsui-key-label">Pending review</Box>
               {loading ? <Spinner size="normal" /> : (
-                <StatusIndicator type={(stats?.duplicates?.pending ?? 0) > 0 ? 'warning' : 'success'}>
-                  {stats?.duplicates?.pending ?? 0}
+                <StatusIndicator type={!stats?.duplicates ? 'pending' : stats.duplicates.pending > 0 ? 'warning' : 'success'}>
+                  {stats?.duplicates ? stats.duplicates.pending : '—'}
                 </StatusIndicator>
               )}
             </div>
             <div>
               <Box variant="awsui-key-label">Confirmed duplicates</Box>
-              {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{stats?.duplicates?.confirmed ?? 0}</Box>}
+              {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{stats?.duplicates?.confirmed ?? '—'}</Box>}
             </div>
             <div>
               <Box variant="awsui-key-label">Marked not-duplicate</Box>
-              {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{stats?.duplicates?.notDuplicate ?? 0}</Box>}
+              {loading ? <Spinner size="normal" /> : <Box variant="awsui-value-large">{stats?.duplicates?.notDuplicate ?? '—'}</Box>}
             </div>
           </ColumnLayout>
           <Box margin={{ top: 'm' }}>
@@ -235,6 +249,12 @@ export default function OverviewPage() {
         />
       </Container>
 
+      {banksError && !error && (
+        <Alert type="warning" header="Bank status unavailable" action={<Button onClick={refetchBanks}>Retry</Button>}>
+          The rest of the overview loaded, but per-bank status did not: {banksError}
+        </Alert>
+      )}
+
       <Table
         loading={banksLoading}
         loadingText="Loading banks"
@@ -254,7 +274,7 @@ export default function OverviewPage() {
         }
         columnDefinitions={[
           {
-            id: 'bank', header: 'Bank', width: 120,
+            id: 'bank', header: 'Bank', width: 110,
             cell: (b: ApiBankSummary) => (
               <Button variant="link" onClick={() => navigate(`/offers?bank=${b.bank}`)}>
                 {b.bank.toUpperCase()}
@@ -262,51 +282,70 @@ export default function OverviewPage() {
             ),
           },
           {
-            id: 'status', header: 'Status', width: 120,
+            id: 'execution', header: 'Last run', width: 150,
             cell: (b: ApiBankSummary) => {
-              const status = b.health_status ?? (parseInt(b.rule_failures) > 0 ? 'Warning' : 'Healthy');
-              const indicatorType =
-                status === 'Healthy' ? 'success' :
-                status === 'Warning' ? 'warning' :
-                status === 'Failed' ? 'error' :
-                status === 'Running' ? 'in-progress' : 'stopped';
-              return <StatusIndicator type={indicatorType}>{status}</StatusIndicator>;
+              switch (b.last_run_status) {
+                case 'running': return <StatusIndicator type="in-progress">Running</StatusIndicator>;
+                case 'completed': return <StatusIndicator type="success">Completed</StatusIndicator>;
+                case 'failed': return <StatusIndicator type="error">Failed</StatusIndicator>;
+                case undefined:
+                case null: return <StatusIndicator type="stopped">Never run</StatusIndicator>;
+                default: return <StatusIndicator type="warning">{b.last_run_status}</StatusIndicator>;
+              }
             },
           },
           {
-            id: 'last_run', header: 'Last run', width: 140,
-            cell: (b: ApiBankSummary) => (
-              <Box color="text-body-secondary" fontSize="body-s">
-                {b.last_run_at ? new Date(b.last_run_at).toLocaleString() : (b.last_updated ? new Date(b.last_updated).toLocaleDateString() : '—')}
-              </Box>
-            ),
+            id: 'attempt', header: 'Last attempt', width: 150,
+            cell: (b: ApiBankSummary) => fmtWhen(b.last_attempted_at ?? b.last_run_at),
           },
           {
-            id: 'raw', header: 'Raw found', width: 90,
-            cell: (b: ApiBankSummary) => b.last_run_found !== undefined ? b.last_run_found : b.total_offers,
+            id: 'success', header: 'Last success', width: 150,
+            cell: (b: ApiBankSummary) => fmtWhen(b.last_success_at, 'Never'),
           },
           {
-            id: 'new', header: 'New', width: 70,
-            cell: (b: ApiBankSummary) => b.last_run_new ?? '—',
+            id: 'extraction', header: 'Extracted (last run)', width: 190,
+            cell: (b: ApiBankSummary) => {
+              if (b.last_run_status === undefined || b.last_run_status === null) return '—';
+              const errors = b.last_run_errors ?? 0;
+              return (
+                <SpaceBetween direction="horizontal" size="xs">
+                  <span>{b.last_run_found ?? 0} found · {b.last_run_new ?? 0} new · {b.last_run_changed ?? 0} changed</span>
+                  {errors > 0 && <Box color="text-status-error">{errors} error{errors === 1 ? '' : 's'}</Box>}
+                </SpaceBetween>
+              );
+            },
           },
           {
-            id: 'changed', header: 'Changed', width: 80,
-            cell: (b: ApiBankSummary) => b.last_run_changed ?? '—',
+            id: 'validation', header: 'Passed rules', width: 140,
+            cell: (b: ApiBankSummary) => {
+              const total = count(b.total_offers);
+              const passed = count(b.validated_count);
+              const failures = count(b.rule_failures);
+              if (total === null || passed === null) return '—';
+              return (
+                <span>
+                  {passed} / {total}
+                  {failures ? <Box display="inline" color="text-status-warning"> · {failures} failing</Box> : null}
+                </span>
+              );
+            },
           },
           {
-            id: 'errors', header: 'Errors', width: 80,
-            cell: (b: ApiBankSummary) => (
-              <Box color={(b.last_run_errors ?? 0) > 0 ? 'text-status-error' : undefined}>
-                {b.last_run_errors ?? 0}
-              </Box>
-            ),
+            id: 'review', header: 'Needs review', width: 120,
+            cell: (b: ApiBankSummary) => {
+              const n = count(b.review_required_count);
+              if (n === null) return '—';
+              return n > 0
+                ? <Button variant="inline-link" onClick={() => navigate(`/review-queue?bank=${b.bank}`)}>{n}</Button>
+                : <span>0</span>;
+            },
           },
           {
-            id: 'offers', header: 'Active / Total', width: 120,
-            cell: (b: ApiBankSummary) => `${b.active_offers} / ${b.total_offers}`,
+            id: 'published', header: 'Published', width: 100,
+            cell: (b: ApiBankSummary) => count(b.published_count ?? b.active_offers) ?? '—',
           },
           {
-            id: 'actions', header: 'Actions', width: 180,
+            id: 'actions', header: 'Actions', width: 170,
             cell: (b: ApiBankSummary) => (
               <SpaceBetween direction="horizontal" size="xxs">
                 <Button variant="inline-link" onClick={() => navigate(`/offers?bank=${b.bank}`)}>Offers</Button>
@@ -319,7 +358,9 @@ export default function OverviewPage() {
         items={banks?.items ?? []}
         empty={
           <Box textAlign="center" color="inherit" padding={{ vertical: 'l' }}>
-            No bank data found. Trigger a scrape to populate bank records.
+            {banksError
+              ? 'Bank status is unavailable because the admin API did not respond.'
+              : 'No bank data found. Run a scrape to populate bank records.'}
           </Box>
         }
         variant="full-page"

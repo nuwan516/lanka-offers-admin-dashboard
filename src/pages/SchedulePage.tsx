@@ -5,33 +5,24 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import Toggle from '@cloudscape-design/components/toggle';
-import FormField from '@cloudscape-design/components/form-field';
-import Input from '@cloudscape-design/components/input';
-import Select from '@cloudscape-design/components/select';
-import Modal from '@cloudscape-design/components/modal';
 import ColumnLayout from '@cloudscape-design/components/column-layout';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
 import Alert from '@cloudscape-design/components/alert';
 import PageLayout from '../components/PageLayout';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { api, type ApiScheduleEntry, type ApiSchedulerStatus } from '../services/api';
-
-const BANK_OPTIONS = ['ALL', 'HNB', 'BOC', 'SAMPATH', 'NDB', 'DFCC', 'SEYLAN', 'PEOPLES', 'PABC', 'NSB', 'COMBANK'].map(
-  (b) => ({ label: b, value: b.toLowerCase() })
-);
 
 export default function SchedulePage() {
   const [schedulerStatus, setSchedulerStatus] = useState<ApiSchedulerStatus | null>(null);
   const [schedules, setSchedules] = useState<ApiScheduleEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [addModal, setAddModal] = useState(false);
   const [runAlert, setRunAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [newName, setNewName] = useState('');
-  const [newCron, setNewCron] = useState('0 6 * * *');
-  const [newDesc, setNewDesc] = useState('');
-  const [newBank, setNewBank] = useState<any>({ label: 'ALL', value: 'all' });
   const [actionInProgress, setActionInProgress] = useState(false);
+  const [confirm, setConfirm] = useState<
+    null | { kind: 'global-on' } | { kind: 'enable'; id: string } | { kind: 'run'; entry: ApiScheduleEntry }
+  >(null);
 
   async function loadScheduleData() {
     try {
@@ -115,32 +106,6 @@ export default function SchedulePage() {
     }
   }
 
-  function addScheduleLocal() {
-    if (!newName.trim()) return;
-    const id = `SCH-${String(schedules.length + 1).padStart(3, '0')}`;
-    const newEntry: ApiScheduleEntry = {
-      id,
-      name: newName.trim(),
-      cron: newCron,
-      description: newDesc.trim() || `${newBank.label} scrape`,
-      bank: newBank.value,
-      enabled: false,
-      timeoutMs: 15 * 60 * 1000,
-      lastRun: null,
-      nextRun: 'Disabled',
-      lastStatus: 'idle',
-      retryCount: 0,
-      maxRetries: 2,
-      backoffMinutes: 5,
-    };
-    setSchedules((prev) => [...prev, newEntry]);
-    setAddModal(false);
-    setNewName('');
-    setNewCron('0 6 * * *');
-    setNewDesc('');
-    setNewBank({ label: 'ALL', value: 'all' });
-  }
-
   return (
     <PageLayout
       title="Schedule & Orchestration"
@@ -154,12 +119,11 @@ export default function SchedulePage() {
           </Button>
           <Button
             variant={schedulerStatus?.enabled ? 'normal' : 'primary'}
-            onClick={toggleGlobal}
+            onClick={() => (schedulerStatus?.enabled ? toggleGlobal() : setConfirm({ kind: 'global-on' }))}
             loading={actionInProgress}
           >
             {schedulerStatus?.enabled ? 'Pause Scheduler' : 'Activate Scheduler'}
           </Button>
-          <Button onClick={() => setAddModal(true)}>Add schedule</Button>
         </SpaceBetween>
       }
     >
@@ -232,7 +196,10 @@ export default function SchedulePage() {
             header: 'Enabled',
             width: 80,
             cell: (s: ApiScheduleEntry) => (
-              <Toggle checked={s.enabled} onChange={() => toggleSchedule(s.id)} />
+              <Toggle
+                checked={s.enabled}
+                onChange={() => (s.enabled ? toggleSchedule(s.id) : setConfirm({ kind: 'enable', id: s.id }))}
+              />
             ),
           },
           {
@@ -290,7 +257,7 @@ export default function SchedulePage() {
               <Button
                 variant="inline-link"
                 disabled={actionInProgress}
-                onClick={() => runNow(s)}
+                onClick={() => setConfirm({ kind: 'run', entry: s })}
               >
                 Run now
               </Button>
@@ -307,61 +274,56 @@ export default function SchedulePage() {
         }
       />
 
-      <Modal
-        visible={addModal}
-        onDismiss={() => setAddModal(false)}
-        header="Add Bank Schedule"
-        footer={
-          <Box float="right">
-            <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="link" onClick={() => setAddModal(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                disabled={!newName.trim()}
-                onClick={addScheduleLocal}
-              >
-                Add schedule
-              </Button>
-            </SpaceBetween>
-          </Box>
-        }
-      >
-        <SpaceBetween size="m">
-          <FormField label="Schedule name">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.detail.value)}
-              placeholder="e.g. Seylan High Frequency"
-            />
-          </FormField>
-          <FormField label="Description">
-            <Input
-              value={newDesc}
-              onChange={(e) => setNewDesc(e.detail.value)}
-              placeholder="What does this schedule do?"
-            />
-          </FormField>
-          <FormField
-            label="Cron expression"
-            description="Standard cron format: minute hour day month weekday"
-          >
-            <Input
-              value={newCron}
-              onChange={(e) => setNewCron(e.detail.value)}
-              placeholder="0 6 * * *"
-            />
-          </FormField>
-          <FormField label="Bank">
-            <Select
-              selectedOption={newBank}
-              onChange={(e) => setNewBank(e.detail.selectedOption)}
-              options={BANK_OPTIONS}
-            />
-          </FormField>
-        </SpaceBetween>
-      </Modal>
+      <ConfirmDialog
+        visible={confirm?.kind === 'global-on'}
+        title="Activate the scheduler?"
+        summary="Enabled schedules will start scraping automatically, without anyone present."
+        consequences={[
+          `${enabledCount} schedule(s) are currently enabled and will run on their cron times.`,
+          'Each run writes offers and run records to the connected database and stages offers for review.',
+          'Nothing is published automatically; publishing stays a manual step.',
+        ]}
+        warning="Unattended scraping is off by default for safety."
+        acknowledgement="I want scheduled scraping to run unattended."
+        confirmLabel="Activate scheduler"
+        loading={actionInProgress}
+        onConfirm={async () => {
+          setConfirm(null);
+          await toggleGlobal();
+        }}
+        onDismiss={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        visible={confirm?.kind === 'enable'}
+        title="Enable this schedule?"
+        summary="It will run automatically on its cron time while the scheduler is active."
+        consequences={['Runs write offers and run records to the connected database.']}
+        confirmLabel="Enable schedule"
+        onConfirm={async () => {
+          const id = confirm?.kind === 'enable' ? confirm.id : null;
+          setConfirm(null);
+          if (id) await toggleSchedule(id);
+        }}
+        onDismiss={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        visible={confirm?.kind === 'run'}
+        title={confirm?.kind === 'run' ? `Run ${confirm.entry.bank.toUpperCase()} scrape now?` : 'Run scrape now?'}
+        summary="This starts a real scrape immediately."
+        consequences={[
+          'Offers and a run record are written to the connected database.',
+          'Offers are staged for review; nothing is published.',
+        ]}
+        acknowledgement="I understand this writes to the connected database."
+        confirmLabel="Run now"
+        loading={actionInProgress}
+        onConfirm={async () => {
+          const entry = confirm?.kind === 'run' ? confirm.entry : null;
+          setConfirm(null);
+          if (entry) await runNow(entry);
+        }}
+        onDismiss={() => setConfirm(null)}
+      />
     </PageLayout>
   );
 }

@@ -11,51 +11,48 @@ import { api } from '../services/api';
 import { useApi } from '../services/use-api';
 import { useTheme } from '../hooks/useTheme';
 
+// Grouped by operator workflow: decide on offers first, then manage how data gets in.
 const NAV_ITEMS: SideNavigationProps.Item[] = [
   { type: 'link', text: 'Overview', href: '/' },
   { type: 'divider' },
   {
-    type: 'section', text: 'Scraping', items: [
-      { type: 'link', text: 'Scrape runs', href: '/runs' },
-      { type: 'link', text: 'Run scraper', href: '/run-scraper' },
-      { type: 'link', text: 'Schedule', href: '/schedule' },
-    ],
-  },
-  {
-    type: 'section', text: 'Data', items: [
-      { type: 'link', text: 'Offers', href: '/offers' },
-      { type: 'link', text: 'Merchants', href: '/merchants' },
-      { type: 'link', text: 'Banks', href: '/branches' },
-      { type: 'link', text: 'Raw evidence', href: '/raw-evidence' },
-      { type: 'link', text: 'Duplicates', href: '/duplicates' },
-    ],
-  },
-  {
-    type: 'section', text: 'Quality', items: [
+    type: 'section', text: 'Review & publishing', items: [
       { type: 'link', text: 'Review queue', href: '/review-queue' },
-      { type: 'link', text: 'Validation', href: '/validation' },
-      { type: 'link', text: 'LLM validation', href: '/llm-validation' },
-      { type: 'link', text: 'Rules', href: '/rules' },
-      { type: 'link', text: 'Bank parser rules', href: '/bank-parser-rules' },
+      { type: 'link', text: 'Offers', href: '/offers' },
+      { type: 'link', text: 'Duplicates', href: '/duplicates' },
+      { type: 'link', text: 'Staging', href: '/staging' },
+      { type: 'link', text: 'Sync queue', href: '/sync-queue' },
+      { type: 'link', text: 'Sync history', href: '/sync-history' },
       { type: 'link', text: 'Sync', href: '/sync' },
     ],
   },
   {
-    type: 'section', text: 'Geo', items: [
+    type: 'section', text: 'Ingestion', items: [
+      { type: 'link', text: 'Scrape runs', href: '/runs' },
+      { type: 'link', text: 'Run scraper', href: '/run-scraper' },
+      { type: 'link', text: 'Schedule', href: '/schedule' },
+      { type: 'link', text: 'Jobs', href: '/jobs' },
+      { type: 'link', text: 'Raw evidence', href: '/raw-evidence' },
+    ],
+  },
+  {
+    type: 'section', text: 'Quality & rules', items: [
+      { type: 'link', text: 'Validation', href: '/validation' },
+      { type: 'link', text: 'LLM validation', href: '/llm-validation' },
+      { type: 'link', text: 'Rules', href: '/rules' },
+      { type: 'link', text: 'Bank parser rules', href: '/bank-parser-rules' },
+    ],
+  },
+  {
+    type: 'section', text: 'Reference data', items: [
+      { type: 'link', text: 'Merchants', href: '/merchants' },
+      { type: 'link', text: 'Banks', href: '/branches' },
       { type: 'link', text: 'Geo map', href: '/geo-map' },
       { type: 'link', text: 'Unresolved locations', href: '/geo-unresolved' },
     ],
   },
   {
-    type: 'section', text: 'Pipeline', items: [
-      { type: 'link', text: 'Staging', href: '/staging' },
-      { type: 'link', text: 'Sync queue', href: '/sync-queue' },
-      { type: 'link', text: 'Sync history', href: '/sync-history' },
-    ],
-  },
-  {
     type: 'section', text: 'System', items: [
-      { type: 'link', text: 'Jobs', href: '/jobs' },
       { type: 'link', text: 'Logs', href: '/logs' },
       { type: 'link', text: 'Errors', href: '/errors' },
       { type: 'link', text: 'Cost & budget tracker', href: '/cost-control' },
@@ -63,6 +60,24 @@ const NAV_ITEMS: SideNavigationProps.Item[] = [
     ],
   },
 ];
+
+function collectHrefs(items: readonly SideNavigationProps.Item[]): string[] {
+  return items.flatMap((item) => {
+    if (item.type === 'link') return [item.href];
+    if (item.type === 'section') return collectHrefs(item.items);
+    return [];
+  });
+}
+
+const NAV_HREFS = collectHrefs(NAV_ITEMS);
+
+// Detail routes such as /runs/42 or /offers/7/review highlight their parent entry.
+function activeNavHref(pathname: string): string {
+  if (pathname === '/budget') return '/cost-control';
+  const match = NAV_HREFS.filter((h) => h !== '/' && (pathname === h || pathname.startsWith(h + '/')))
+    .sort((x, y) => y.length - x.length)[0];
+  return match ?? (pathname === '/' ? '/' : pathname);
+}
 
 export default function AppLayout() {
   const navigate = useNavigate();
@@ -82,7 +97,7 @@ export default function AppLayout() {
           utilities={[
             {
               type: 'button',
-              text: isDark ? 'Dark Mode' : 'Light Mode',
+              text: isDark ? 'Switch to light' : 'Switch to dark',
               iconName: 'light-dark',
               ariaLabel: `Switch to ${isDark ? 'light' : 'dark'} mode`,
               onClick: toggleTheme,
@@ -112,7 +127,7 @@ export default function AppLayout() {
         navigation={
           <SideNavigation
             header={{ text: 'Lanka Offers', href: '/' }}
-            activeHref={location.pathname}
+            activeHref={activeNavHref(location.pathname)}
             items={NAV_ITEMS}
             onFollow={e => {
               e.preventDefault();

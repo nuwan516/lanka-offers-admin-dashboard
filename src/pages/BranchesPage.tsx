@@ -27,7 +27,7 @@ export default function BranchesPage() {
     []
   );
 
-  // Extract branches from live offers with geocoded data, fallback to mockBranches if none
+  // Extract branches from live offers with geocoded data
   const branches: Branch[] = useMemo(() => {
     const liveBranches: Branch[] = [];
     let count = 0;

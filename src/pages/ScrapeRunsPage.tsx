@@ -11,6 +11,7 @@ import Alert from '@cloudscape-design/components/alert';
 import { api, type ApiScrapeRun } from '../services/api';
 import { useApi } from '../services/use-api';
 import PageLayout from '../components/PageLayout';
+import JobActionConfirm, { type JobAction } from '../components/JobActionConfirm';
 
 const BANKS = ['HNB', 'BOC', 'SAMPATH', 'NDB', 'DFCC', 'SEYLAN', 'PEOPLES', 'PABC', 'NSB', 'COMBANK'];
 
@@ -45,7 +46,24 @@ export default function ScrapeRunsPage() {
     [bankFilter.value, statusFilter.value]
   );
 
-  async function handleCancel(bank: string) {
+  const [pendingAction, setPendingAction] = useState<JobAction>(null);
+
+  // Cancel and retry both affect running jobs or write data, so they confirm first.
+  function handleCancel(bank: string) {
+    setPendingAction({ kind: 'cancel', bank });
+  }
+  function handleRetry(bank: string) {
+    setPendingAction({ kind: 'retry', bank });
+  }
+  async function confirmPending() {
+    const action = pendingAction;
+    setPendingAction(null);
+    if (!action) return;
+    if (action.kind === 'cancel') await doCancel(action.bank);
+    else await doRetry(action.bank);
+  }
+
+  async function doCancel(bank: string) {
     setActionBusy(`cancel-${bank}`);
     setActionMessage(null);
     try {
@@ -59,7 +77,7 @@ export default function ScrapeRunsPage() {
     }
   }
 
-  async function handleRetry(bank: string) {
+  async function doRetry(bank: string) {
     setActionBusy(`retry-${bank}`);
     setActionMessage(null);
     try {
@@ -228,6 +246,12 @@ export default function ScrapeRunsPage() {
         header={<Header variant="h2" counter={`(${runs.length})`}>Run history</Header>}
         variant="full-page"
         stickyHeader
+      />
+      <JobActionConfirm
+        action={pendingAction}
+        busy={actionBusy !== null}
+        onConfirm={confirmPending}
+        onDismiss={() => setPendingAction(null)}
       />
     </PageLayout>
   );
